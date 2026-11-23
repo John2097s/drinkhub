@@ -150,6 +150,11 @@
           <i data-lucide="users" class="w-4 h-4 text-cyan-400 shrink-0"></i>
           <span id="player-count-badge" class="text-zinc-200">0</span>
         </button>
+
+        <button onclick="openProfileView()" class="flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 px-2.5 sm:px-3 py-2 min-h-[40px] rounded-xl text-xs font-semibold transition active:scale-95" title="Profil & Archiv">
+          <i data-lucide="user-check" class="w-4 h-4 text-purple-400 shrink-0"></i>
+          <span class="hidden sm:inline text-zinc-200">Profil</span>
+        </button>
       </div>
     </div>
   </header>
@@ -321,497 +326,40 @@
     ];
 
     // =========================================================================
-    // 2. SPIELE-DATENBANK (ALLE FRANCHISES & STANDALONE TITEL)
+    // 2. MODULARES SPIELE-REGISTRY (AKTUELL NUR DBD FOKUSSIERTER HUB)
     // =========================================================================
-    const GAMES_DB = [
-      {
-        id: 'resident-evil',
-        title: 'Resident Evil',
-        subtitle: '0, 1, 2, 3, 4, 5, 7 + DLCs, 8 & 9',
-        genre: 'horror',
-        badge: '10 Teile',
-        accent: 'from-red-600 to-rose-900',
-        borderAccent: 'border-red-500/40',
-        icon: 'biohazard',
-        isFranchise: true,
-        subGames: [
-          {
-            id: 're-0',
-            title: 'Resident Evil 0',
-            tag: 'Zug & Partner-Zapping',
-            rules: [
-              { event: 'Partner-Wechsel vergessen & einer kassiert Schaden', sips: 2, type: 'punish' },
-              { event: 'Item auf den Boden abgelegt, weil Inventar voll ist', sips: 1, type: 'normal' },
-              { event: 'Von einem Leech-Zombie angesprungen worden', sips: 2, type: 'punish' },
-              { event: 'Heilkräuter erfolgreich gemischt', sips: 1, type: 'reward' }
-            ],
-            cards: [
-              'Billy & Rebecca Check: Wer weniger Munition hat, trinkt 2 Schlucke.',
-              'Zug-Chaos: Alle trinken 1 Schluck auf die guten alten festen Kamerawinkel!',
-              'Partner-Pakt: Wähle einen Mitspieler – bei deinem nächsten Schaden trinkt er mit.'
-            ]
-          },
-          {
-            id: 're-1',
-            title: 'Resident Evil 1 (Remake)',
-            tag: 'Spencer Mansion',
-            rules: [
-              { event: 'Crimson Head steht plötzlich wieder auf', sips: 3, type: 'punish' },
-              { event: 'Tür-Animation läuft (Atmosphäre genießen)', sips: 1, type: 'normal' },
-              { event: 'Farbband zum Speichern benutzt', sips: 1, type: 'normal' },
-              { event: 'Von Hunter geköpft worden (Insta-Death)', sips: 5, type: 'extreme' }
-            ],
-            cards: [
-              'Jill Sandwich: Der Spieler links vom Controller trinkt 2 Schlucke.',
-              'Kerosin-Mangel: Wer keine Verbrennungs-Munition mehr hat, trinkt 3 Schlucke.',
-              'Rätsel-Genie: Schafft ihr das nächste Rätsel ohne Guide, verteile 3 Schlucke.'
-            ]
-          },
-          {
-            id: 're-2',
-            title: 'Resident Evil 2',
-            tag: 'Raccoon City & Mr. X',
-            rules: [
-              { event: 'Mr. X Schritte sind zu hören & Panik bricht aus', sips: 1, type: 'normal' },
-              { event: 'Von Mr. X eine rechte Gerade kassiert', sips: 3, type: 'punish' },
-              { event: 'Licker durch Rennen getriggert', sips: 2, type: 'punish' },
-              { event: 'Kopf eines Zombies mit einem Schuss geplatzt', sips: 1, type: 'reward' }
-            ],
-            cards: [
-              'X Gon’ Give It To Ya: Sobald Mr. X durch eine Tür kommt, trinken ALLE 2 Schlucke!',
-              'R.P.D. Tresor: Rate den Code – liegst du falsch, trink 2 Schlucke.',
-              'Messer-Sparfuchs: Verteile 2 Schlucke, wenn das Kampfmesser noch über 50% hat.'
-            ]
-          },
-          {
-            id: 're-3',
-            title: 'Resident Evil 3',
-            tag: 'Nemesis Jagd',
-            rules: [
-              { event: 'Nemesis brüllt „S.T.A.R.S.!“', sips: 2, type: 'normal' },
-              { event: 'Perfektes Ausweichen (Dodge) verkackt', sips: 2, type: 'punish' },
-              { event: 'Nemesis mit einer Granate in die Knie gezwungen', sips: 2, type: 'reward' },
-              { event: 'Tentakel-Grab aus der Ferne abbekommen', sips: 2, type: 'punish' }
-            ],
-            cards: [
-              'S.T.A.R.S. Alarm: Wer beim nächsten Nemesis-Auftritt zuerst schreit, trinkt 3 Schlucke.',
-              'Carlos-Support: Verteile 3 Schlucke an deine Mitspieler!',
-              'Munitions-Knappheit: Unter 10 Schuss in der Pistole? Trink 2 Schlucke.'
-            ]
-          },
-          {
-            id: 're-4',
-            title: 'Resident Evil 4',
-            tag: 'Los Illuminados & Händler',
-            rules: [
-              { event: 'Der Händler sagt „What’re ya buyin’?“ / „Stranger!“', sips: 1, type: 'normal' },
-              { event: 'Ashley schreit „LEON! HEEEELP!“', sips: 2, type: 'punish' },
-              { event: 'Kettensägen-Typ (Dr. Salvador) kommt ins Bild', sips: 3, type: 'extreme' },
-              { event: 'Roundhouse-Kick oder Suplex ausgeführt', sips: 1, type: 'reward' }
-            ],
-            cards: [
-              'Händler-Deal: Kaufe ein Upgrade – danach darfst du 3 Schlucke verteilen.',
-              'Bärenfalle übersehen: Wer reintritt, trinkt sofort 2 Schlucke.',
-              'Koffer-Tetris: 15 Sekunden Inventar sortieren – wenn es nicht passt, 2 Schlucke!'
-            ]
-          },
-          {
-            id: 're-5',
-            title: 'Resident Evil 5',
-            tag: 'Koop-Action & Boulder Punch',
-            rules: [
-              { event: 'KI- oder Koop-Partner verschwendet Heil-Spray', sips: 2, type: 'punish' },
-              { event: '„CHRIS!“ / „SHEVA!“ Spam im Gefecht', sips: 1, type: 'normal' },
-              { event: 'Wesker weicht deinen Schüssen in Zeitlupe aus', sips: 2, type: 'punish' },
-              { event: 'Chris schlägt den legendären Felsen im Vulkan', sips: 4, type: 'extreme' }
-            ],
-            cards: [
-              'Koop-Sync: Beide Spieler müssen gleichzeitig einen Schluck nehmen!',
-              '7 Minutes: Wesker sagt seinen Spruch – alle trinken 2 Schlucke.',
-              'Combo-Finisher: Gelingt ein Koop-Nahkampf, verteilt ihr zusammen 4 Schlucke.'
-            ]
-          },
-          {
-            id: 're-7',
-            title: 'Resident Evil 7: Biohazard',
-            tag: 'Baker Anwesen',
-            rules: [
-              { event: 'Jack Baker bricht durch eine Wand („Welcome to the family“)', sips: 3, type: 'punish' },
-              { event: 'Ethan verliert eine Hand oder ein Bein', sips: 4, type: 'extreme' },
-              { event: 'Jumpscare im dunklen Flur', sips: 2, type: 'punish' },
-              { event: 'Sicherheitsraum-Musik erklingt (kurz durchatmen)', sips: 1, type: 'reward' }
-            ],
-            cards: [
-              'Familienessen: Der Gastgeber bestimmt, wer 3 Schlucke trinken muss.',
-              'Videokassette gefunden: Alle trinken 1 Schluck auf Found-Footage-Horror.',
-              'Taschenlampen-Mut: Wer freiwillig vorangeht, darf 2 Schlucke verteilen.'
-            ]
-          },
-          {
-            id: 're-7-dlcs',
-            title: 'RE 7 DLCs (Banned Footage & Co.)',
-            tag: '21, Bedroom, End of Zoe, Not a Hero',
-            rules: [
-              { event: 'Bei „21“ (Blackjack) eine Runde gegen Lucas verloren', sips: 2, type: 'punish' },
-              { event: 'Joe Baker verpasst einem Molded eine rechte Gerade', sips: 1, type: 'reward' },
-              { event: 'Marguerite erwischt dich im Schlafzimmer-DLC', sips: 3, type: 'punish' },
-              { event: 'Chris Redfield im „Not a Hero“-DLC ohne Munition', sips: 2, type: 'normal' }
-            ],
-            cards: [
-              'Lucas’ Spielchen: Schnick-Schnack-Schnuck gegen deinen rechten Nachbarn – Verlierer trinkt 3!',
-              'Joe Baker Power: K.O.-Schlag im Nahkampf = verteile 2 Schlucke.',
-              'Ethan Must Die: Stirbst du im Hardcore-Modus, trink 4 Schlucke!'
-            ]
-          },
-          {
-            id: 're-8',
-            title: 'Resident Evil Village (8)',
-            tag: 'Schloss Dimitrescu & Beneviento',
-            rules: [
-              { event: 'Lady Dimitrescu taucht auf (alle bewundern sie)', sips: 2, type: 'normal' },
-              { event: 'Das Riesenbaby im Haus Beneviento schreit', sips: 4, type: 'extreme' },
-              { event: 'Duke kocht ein Gericht oder verkauft Zeug', sips: 1, type: 'reward' },
-              { event: 'Lykaner beißt dich in die Schulter', sips: 2, type: 'punish' }
-            ],
-            cards: [
-              'Haus Beneviento Pflicht: Licht aus im Zimmer für 5 Minuten oder alle trinken 2 Schlucke!',
-              'Heisenbergs Fabrik: Wer sich im Labyrinth verläuft, trinkt 2 Schlucke.',
-              'Fliegenklatsche: Besiegst du eine Dimitrescu-Tochter, verteile 3 Schlucke.'
-            ]
-          },
-          {
-            id: 're-9',
-            title: 'Resident Evil 9',
-            tag: 'Next-Gen Survival Horror',
-            rules: [
-              { event: 'Unerwarteter Jumpscare in der neuen Open-Zone', sips: 2, type: 'punish' },
-              { event: 'Neuer Biowaffen-Boss taucht zum ersten Mal auf', sips: 3, type: 'extreme' },
-              { event: 'Munition komplett leer mitten im Kampf', sips: 2, type: 'punish' },
-              { event: 'Boss-Phase ohne Schaden überstanden', sips: 2, type: 'reward' }
-            ],
-            cards: [
-              'Hype-Check: Alle stoßen an und trinken 2 Schlucke auf das neueste Kapitel!',
-              'Blind-Run: Wer als Nächstes stirbt, trinkt 3 Schlucke.',
-              'Überlebenskünstler: Verteile 3 Schlucke, wenn du weniger als 20% Leben überlebst.'
-            ]
-          }
-        ]
-      },
-      {
-        id: 'cod-mw',
-        title: 'Call of Duty: MW',
-        subtitle: 'MW1, MW2, MW3 & MW 2019–2026',
-        genre: 'shooter',
-        badge: '7 Titel',
-        accent: 'from-emerald-600 to-teal-900',
-        borderAccent: 'border-emerald-500/40',
-        icon: 'crosshair',
-        isFranchise: true,
-        subGames: [
-          {
-            id: 'cod-mw1',
-            title: 'CoD 4: Modern Warfare (2007)',
-            tag: 'All Ghillied Up & Klassiker',
-            rules: [
-              { event: 'Von einer Zufalls-Granate am Spawn erwischt', sips: 2, type: 'punish' },
-              { event: 'In „All Ghillied Up“ entdeckt worden', sips: 3, type: 'punish' },
-              { event: '3er/5er/7er Killstreak-Kette komplett durchgezogen', sips: 2, type: 'reward' },
-              { event: 'Durch Last Stand / Martyrium gekillt worden', sips: 2, type: 'punish' }
-            ],
-            cards: [
-              '50,000 People Used to Live Here: Alle trinken 1 Schluck auf die Legende!',
-              'Juggernaut / Martyrium Schande: Wer das nutzt, trinkt 3 Schlucke.',
-              'Sniper-Duell: Der nächste Quickscope-Kill erlaubt dir, 3 Schlucke zu verteilen.'
-            ]
-          },
-          {
-            id: 'cod-mw2-classic',
-            title: 'Modern Warfare 2 (2009)',
-            tag: 'Rust 1v1 & Tactical Nuke',
-            rules: [
-              { event: 'Von einem Noob-Tube (Granatwerfer) geholt', sips: 2, type: 'punish' },
-              { event: '360-No-Scope Versuch geht komplett daneben', sips: 2, type: 'punish' },
-              { event: 'AC-130 oder Chopper Gunner erreicht', sips: 3, type: 'reward' },
-              { event: 'Wurfmesser-Kill über die halbe Map', sips: 4, type: 'reward' }
-            ],
-            cards: [
-              '1v1 me on Rust: Fordere einen Freund heraus – Verlierer trinkt 3 Schlucke!',
-              'Akimbo Model 1887: Alle trinken 2 Schlucke auf das kaputteste Balancing der Geschichte.',
-              'Tactical Nuke Inbound: Wenn jemand 10 Kills am Stück schafft, trinken alle anderen 3!'
-            ]
-          },
-          {
-            id: 'cod-mw3-classic',
-            title: 'Modern Warfare 3 (2011)',
-            tag: 'Survival & Specialist',
-            rules: [
-              { event: 'Specialist Bonus (alle Perks) freigeschaltet', sips: 3, type: 'reward' },
-              { event: 'Im Survival-Modus von einem Juggernaut überrannt', sips: 3, type: 'punish' },
-              { event: 'MOAB-Streak kurz vor dem Ziel verloren', sips: 4, type: 'extreme' },
-              { event: 'Mit der FMG9 Akimbo weggelasert worden', sips: 2, type: 'punish' }
-            ],
-            cards: [
-              'MOAB-Jäger: Wer am Ende der Runde die höchste K/D hat, verteilt 3 Schlucke.',
-              'Infected-Modus: Wer zuerst infiziert wird, trinkt 2 Schlucke.',
-              'Support-Streak: Auch ohne Skill gibt’s Belohnung – alle trinken 1 Schluck.'
-            ]
-          },
-          {
-            id: 'cod-mw2019',
-            title: 'Modern Warfare (2019)',
-            tag: 'Clean House & Gulag',
-            rules: [
-              { event: 'Im Gulag 1v1 verloren', sips: 2, type: 'punish' },
-              { event: 'Durch eine Claymore hinter einer geschlossenen Tür gestorben', sips: 2, type: 'punish' },
-              { event: 'Execution (Finishing Move) erfolgreich durchgezogen', sips: 3, type: 'reward' },
-              { event: 'Im Squad als Erster in der Runde gestorben', sips: 2, type: 'punish' }
-            ],
-            cards: [
-              'Bravo Six, Going Dark: Alle trinken 2 Schlucke!',
-              'Slide-Cancel-Schwitz: Wer am schnellsten durch die Map slidet, verteilt 2 Schlucke.',
-              'Gulag-König: Gewinnst du dein Gulag, darfst du 2 Schlucke verteilen.'
-            ]
-          },
-          {
-            id: 'cod-mw2-2022',
-            title: 'Modern Warfare II (2022)',
-            tag: 'DMZ & Shipment Chaos',
-            rules: [
-              { event: 'Auf Shipment 3x innerhalb von 10 Sekunden gestorben', sips: 3, type: 'punish' },
-              { event: 'In DMZ beim Exfil von Spielern abgecampt worden', sips: 3, type: 'punish' },
-              { event: 'Drill-Charge Kill durch die Wand gelandet', sips: 2, type: 'reward' },
-              { event: 'Von einer Blendgranate 5 Sekunden komplett blind', sips: 1, type: 'normal' }
-            ],
-            cards: [
-              'Shipment Wahnsinn: Jede Granate in dieser Runde kostet dich 1 Schluck bei Tod!',
-              'Tactical Proximity Chat: Sprich 1 Runde lang wie ein echter Soldat oder trink 2 Schlucke.',
-              'Kopfschuss-Serie: 3 Headshots in einer Runde = verteile 3 Schlucke.'
-            ]
-          },
-          {
-            id: 'cod-mw3-2023',
-            title: 'Modern Warfare III (2023)',
-            tag: 'Zombies & Movement',
-            rules: [
-              { event: 'In der roten Zone (MWZ) ohne Self-Revive down gegangen', sips: 3, type: 'punish' },
-              { event: 'Von einem Riot-Shield-Spieler getrollt worden', sips: 2, type: 'punish' },
-              { event: 'Play of the Game (Best Play) am Rundenende geholt', sips: 3, type: 'reward' },
-              { event: 'Mit dem Kar98k einen One-Shot-Headshot gelandet', sips: 2, type: 'reward' }
-            ],
-            cards: [
-              'Bottom-Fragger Steuer: Wer am Rundenende ganz unten auf dem Scoreboard steht, trinkt 3 Schlucke!',
-              'Nostalgie-Map: Auf jeder alten MW2-Map trinken alle 1 Schluck.',
-              'Pack-a-Punch: Upgrade deine Waffe – und verteile 2 Schlucke.'
-            ]
-          },
-          {
-            id: 'cod-mw-2026',
-            title: 'CoD Modern Warfare (2026)',
-            tag: 'Next-Gen Warfare',
-            rules: [
-              { event: 'Vom SBMM komplett in eine Schwitzer-Lobby geworfen', sips: 2, type: 'punish' },
-              { event: 'Neue Taktik-Ausrüstung falsch geworfen & selbst getroffen', sips: 2, type: 'punish' },
-              { event: 'Top 1 im Match / Sieger-Team', sips: 2, type: 'reward' },
-              { event: 'Über den Voice-Chat beleidigt worden', sips: 1, type: 'normal' }
-            ],
-            cards: [
-              'Squad-Leader: Der Spieler mit den meisten Assists darf 3 Schlucke verteilen.',
-              'Waffen-Roulette: Spiele nächste Runde mit einer zufälligen Klasse oder trink 3 Schlucke.',
-              'Clutch-Moment: Letzter Überlebender im Team? Alle schauen zu – bei Sieg trinken alle anderen 3!'
-            ]
-          }
-        ]
-      },
+    // Andere Spiele sind vorerst für maximale Performance entfernt und können
+    // über `registerGameModule(...)` später problemlos ergänzt werden.
+    const GAME_MODULES = [
       {
         id: 'dead-by-daylight',
         title: 'Dead by Daylight',
-        subtitle: 'Survivor & Killer Modus + Live Tracker',
+        subtitle: 'Survivor, Killer & Zuschauer-Wetten + Live Tracker',
         genre: 'horror',
-        badge: 'Full Mode',
+        badge: 'Aktiv',
         accent: 'from-rose-700 to-zinc-900',
         borderAccent: 'border-rose-500/50',
         icon: 'skull',
-        isFranchise: false,
         isCustomDbd: true
-      },
-      {
-        id: 'phasmophobia',
-        title: 'Phasmophobia',
-        subtitle: 'Geisterjagd & Sanity-Verlust',
-        genre: 'horror',
-        badge: 'Koop-Horror',
-        accent: 'from-cyan-700 to-slate-900',
-        borderAccent: 'border-cyan-500/40',
-        icon: 'ghost',
-        isFranchise: false,
-        rules: [
-          { event: 'Geist startet eine Jagd (Hunt) & Türen knallen zu', sips: 2, type: 'normal' },
-          { event: 'Jemand stirbt während der Jagd (Hände vors Gesicht)', sips: 4, type: 'extreme' },
-          { event: 'Geist antwortet über die Spirit Box („E“ / „Behind you“)', sips: 2, type: 'normal' },
-          { event: 'Verfluchtes Objekt (Ouija-Brett, Spieluhr) heimlich benutzt', sips: 3, type: 'punish' },
-          { event: 'Falschen Geist im Journal eingetragen', sips: 3, type: 'punish' },
-          { event: 'Richtigen Geist + alle Nebenziele geschafft', sips: 3, type: 'reward' }
-        ],
-        cards: [
-          'Mutprobe: Gehe alleine ohne Taschenlampe für 30 Sek. ins Haus – oder trink 3 Schlucke!',
-          'Van-Camper: Wer die meiste Zeit im Truck auf die Kameras starrt, trinkt 2 Schlucke.',
-          'Geister-Foto: Mach ein 3-Sterne-Foto vom Geist und verteile 3 Schlucke!'
-        ]
-      },
-      {
-        id: 'subnautica',
-        title: 'Subnautica',
-        subtitle: 'Tiefsee-Terror & Leviathane',
-        genre: 'horror',
-        badge: 'Survival',
-        accent: 'from-blue-600 to-indigo-950',
-        borderAccent: 'border-blue-500/40',
-        icon: 'waves',
-        isFranchise: false,
-        rules: [
-          { event: 'Reaper Leviathan brüllt aus dem Nichts', sips: 3, type: 'punish' },
-          { event: 'PDA sagt „Oxygen“ (Sauerstoff unter 30 Sek.)', sips: 1, type: 'normal' },
-          { event: 'Fast ertrunken (Bildschirm wird schwarz)', sips: 3, type: 'punish' },
-          { event: 'Seemotte oder Zyklop wird zerstört', sips: 4, type: 'extreme' },
-          { event: 'Neuen Bauplan erfolgreich gescannt', sips: 1, type: 'reward' }
-        ],
-        cards: [
-          'Ab in die Tiefe: Tauche 100 Meter tiefer als geplant – oder trink 2 Schlucke.',
-          'Crash-Zone: Wer freiwillig hinter die Aurora schwimmt, darf 4 Schlucke verteilen!',
-          'Thalassophobie: Alle trinken 1 Schluck, sobald kein Meeresboden mehr zu sehen ist.'
-        ]
-      },
-      {
-        id: 'hitman',
-        title: 'Hitman (WoA)',
-        subtitle: 'Silent Assassin & Verkleidungen',
-        genre: 'stealth',
-        badge: 'Stealth',
-        accent: 'from-red-700 to-neutral-900',
-        borderAccent: 'border-red-500/40',
-        icon: 'user-check',
-        isFranchise: false,
-        rules: [
-          { event: '„Silent Assassin“ Status verloren (entdeckt worden)', sips: 2, type: 'punish' },
-          { event: 'Wache findet eine schlecht versteckte Leiche', sips: 2, type: 'punish' },
-          { event: 'Unfall-Kill (Kronleuchter, Gift, Schubs) gelingt perfekt', sips: 2, type: 'reward' },
-          { event: 'Zielperson mit einem Fisch oder Kofferraum-Wurf ausgeknockt', sips: 2, type: 'reward' },
-          { event: 'Komplettes Feuergefecht ausgelöst (Panik-Modus)', sips: 3, type: 'extreme' }
-        ],
-        cards: [
-          'Agent 47 Stil: Schalte das nächste Ziel im Anzug (ohne Verkleidung) aus -> verteile 4 Schlucke!',
-          'Kollateralschaden: Für jeden Zivilisten, der stirbt, trinkst du 1 Schluck.',
-          'Ente voraus: Nutze die Quietscheente – alle trinken 1 Schluck.'
-        ]
-      },
-      {
-        id: 'bigfoot',
-        title: 'Bigfoot',
-        subtitle: 'Monsterjagd im Nationalpark',
-        genre: 'coop',
-        badge: 'Koop-Chaos',
-        accent: 'from-amber-700 to-stone-900',
-        borderAccent: 'border-amber-500/40',
-        icon: 'footprints',
-        isFranchise: false,
-        rules: [
-          { event: 'Bigfoot springt aus dem Gebüsch & prügelt dich weg', sips: 2, type: 'punish' },
-          { event: 'Eigener Mitspieler läuft in deine Bärenfalle', sips: 3, type: 'punish' },
-          { event: 'Bigfoot mit der Leuchtpistole getroffen', sips: 2, type: 'reward' },
-          { event: 'Im Dunkeln komplett vom Squad getrennt', sips: 2, type: 'normal' },
-          { event: 'Bigfoot erfolgreich erlegt!', sips: 3, type: 'reward' }
-        ],
-        cards: [
-          'Bärenfallen-Troll: Wer eine Falle direkt vor den Wohnwagen legt, trinkt 2 Schlucke.',
-          'Fleisch-Köder: Du musst Bigfoot anlocken – überlebst du, verteile 3 Schlucke.',
-          'Nachtsicht-Panik: Alle trinken 1 Schluck, sobald Bigfoot brüllt.'
-        ]
-      },
-      {
-        id: 'lunch-lady',
-        title: 'Lunch Lady',
-        subtitle: 'Prüfungsbögen & Bratpfannen-Horror',
-        genre: 'coop',
-        badge: 'Koop-Chaos',
-        accent: 'from-orange-600 to-red-950',
-        borderAccent: 'border-orange-500/40',
-        icon: 'utensils',
-        isFranchise: false,
-        rules: [
-          { event: 'Lunch Lady rennt mit erhobener Bratpfanne auf dich zu', sips: 2, type: 'normal' },
-          { event: 'Mit der Bratpfanne K.O. geschlagen worden', sips: 3, type: 'punish' },
-          { event: 'Mitspieler mit einem Medkit wiederbelebt', sips: 2, type: 'reward' },
-          { event: 'Schlüssel für verschlossenes Klassenzimmer gefunden', sips: 1, type: 'reward' },
-          { event: 'Alle 10 Seiten gesammelt & entkommen!', sips: 3, type: 'reward' }
-        ],
-        cards: [
-          'Nachsitzen: Wer aktuell die wenigsten Seiten gesammelt hat, trinkt 2 Schlucke!',
-          'Schulkantine: Alle stoßen an und trinken 1 Schluck auf das heutige Menü.',
-          'Retter in der Not: Wer zuletzt jemanden wiederbelebt hat, verteilt 3 Schlucke.'
-        ]
-      },
-      {
-        id: 'little-nightmares',
-        title: 'Little Nightmares (1 & 2)',
-        subtitle: 'Albtraum-Rätsel & Verfolgung',
-        genre: 'horror',
-        badge: 'Atmosphäre',
-        accent: 'from-yellow-600 to-zinc-900',
-        borderAccent: 'border-yellow-500/40',
-        icon: 'eye',
-        isFranchise: false,
-        rules: [
-          { event: 'Von einem Monster gepackt & gefressen/zerquetscht', sips: 2, type: 'punish' },
-          { event: 'Bei einer Sprung-Passage in den Abgrund gefallen', sips: 2, type: 'punish' },
-          { event: 'Verfolgungsjagd im ersten Versuch überlebt', sips: 2, type: 'reward' },
-          { event: 'Einen Wicht (Nome) umarmt oder ein Geheimnis gefunden', sips: 1, type: 'reward' }
-        ],
-        cards: [
-          'Regenmantel-Check: Wer am Controller sitzt, darf 2 Schlucke an einen Zuschauer abgeben.',
-          'Fluchtinstinkt: Bei der nächsten Verfolgung darf niemand reden – wer redet, trinkt 2 Schlucke!',
-          'Rätsel-Hilfe: Wer einen Tipp aus der Gruppe annimmt, trinkt 1 Schluck.'
-        ]
-      },
-      {
-        id: 'thief-simulator',
-        title: 'Thief Simulator (1 & 2)',
-        subtitle: 'Einbruch, Loot & Polizei-Flucht',
-        genre: 'stealth',
-        badge: 'Stealth / Chaos',
-        accent: 'from-violet-600 to-slate-900',
-        borderAccent: 'border-violet-500/40',
-        icon: 'key-round',
-        isFranchise: false,
-        rules: [
-          { event: 'Nachbar sieht dich & ruft die Polizei', sips: 2, type: 'punish' },
-          { event: 'Von der Polizei geschnappt / getasert worden', sips: 4, type: 'extreme' },
-          { event: 'Schlossknacken oder Tresor im ersten Versuch geschafft', sips: 2, type: 'reward' },
-          { event: 'Mit einem geklauten Fernseher gegen eine Tür gerannt', sips: 1, type: 'normal' },
-          { event: 'Auftrag über 1.000$ Profit abgeschlossen', sips: 2, type: 'reward' }
-        ],
-        cards: [
-          'Gier frisst Hirn: Geh nochmal ins Haus zurück für ein extra Teil – wenn’s klappt, verteile 3 Schlucke!',
-          'Fluchtwagen: Wenn du beim Wegfahren ein anderes Auto rammst, trink 2 Schlucke.',
-          'Meisterdieb: Alle trinken 1 Schluck auf die Beute!'
-        ]
       }
     ];
 
+    function registerGameModule(moduleDef) {
+      if (!moduleDef || !moduleDef.id) return;
+      const idx = GAME_MODULES.findIndex(m => m.id === moduleDef.id);
+      if (idx >= 0) GAME_MODULES[idx] = moduleDef;
+      else GAME_MODULES.push(moduleDef);
+    }
+
     // =========================================================================
-    // 3. APP STATE & PERSISTENCE
+    // 3. APP STATE, PROFIL-ARCHIV & PERSISTENCE
     // =========================================================================
     let state = {
       view: 'hub',
-      selectedGenre: 'all',
-      searchQuery: '',
-      selectedFranchiseId: null,
       selectedGameId: null,
-      activeTab: 'rules',
-      intensity: 'normal',
-      currentCard: null,
-      pendingDrink: null,
       hasSetInitialName: false,
       players: [],
+      profileArchive: [],
       lobby: {
         role: 'offline',
         code: '',
@@ -827,6 +375,7 @@
         killerSubMode: 'solo',
         killerPlayerIndex: 0,
         activePredictPlayerIndex: 0,
+        activeTargetStep: 0,
         activeLivePlayerId: '',
         predictions: {},
         readyPlayers: {},
@@ -861,8 +410,21 @@
           state.dbd.activeLivePlayerId = parsed[0].id;
         }
       }
+      const savedArchive = localStorage.getItem('drinkhub_profile_archive');
+      if (savedArchive) {
+        const parsedArchive = JSON.parse(savedArchive);
+        if (Array.isArray(parsedArchive)) {
+          state.profileArchive = parsedArchive;
+        }
+      }
     } catch (e) {
       console.warn('LocalStorage nicht verfügbar:', e);
+    }
+
+    function saveArchive() {
+      try {
+        localStorage.setItem('drinkhub_profile_archive', JSON.stringify(state.profileArchive.slice(0, 50)));
+      } catch (e) {}
     }
 
     function setInitialPlayerName(e) {
@@ -883,7 +445,7 @@
         localStorage.setItem('drinkhub_has_name', '1');
       } catch (err) {}
       savePlayers();
-      triggerRumble([60, 40, 80]);
+      triggerRumble('medium');
       showToast(`Willkommen, ${name}!`);
       render();
     }
@@ -905,44 +467,50 @@
       }
     }
 
-    function triggerRumble(pattern = [120, 60, 180]) {
+    /**
+     * Einheitliche Vibration: immer EIN durchgehendes Puls-Muster ("1 Brr"),
+     * unterschieden ausschließlich über die Dauer/Stärke ('light' | 'medium' | 'heavy').
+     */
+    function triggerRumble(strength = 'medium', sendRemote = true) {
+      const durationMap = {
+        light: 45,
+        medium: 140,
+        heavy: 320
+      };
+      const ms = durationMap[strength] || durationMap.medium;
+
       try {
         if (typeof navigator !== 'undefined') {
           const vibFn = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate;
           if (typeof vibFn === 'function') {
-            const normalizedPattern = Array.isArray(pattern)
-              ? pattern.map(ms => Math.max(20, Number(ms) || 50))
-              : [Math.max(40, Number(pattern) || 120)];
-            vibFn.call(navigator, normalizedPattern);
+            vibFn.call(navigator, ms);
           }
         }
       } catch (e) {}
+
+      if (sendRemote) {
+        if (state.lobby.role === 'host' && Array.isArray(state.lobby.conns)) {
+          state.lobby.conns.forEach(conn => {
+            if (conn && conn.open) {
+              conn.send({ type: 'RUMBLE', strength });
+            }
+          });
+        } else if (state.lobby.role === 'client' && state.lobby.hostConn && state.lobby.hostConn.open) {
+          state.lobby.hostConn.send({ type: 'RUMBLE_REQUEST', strength });
+        }
+      }
     }
 
     function triggerVictoryConfetti() {
-      triggerRumble([100, 50, 100, 50, 250]);
+      triggerRumble('heavy', true);
       try {
         if (typeof confetti === 'function') {
           confetti({
-            particleCount: 85,
-            spread: 70,
+            particleCount: 75,
+            spread: 68,
             origin: { y: 0.65 },
             colors: ['#a855f7', '#06b6d4', '#ec4899', '#f59e0b', '#10b981']
           });
-          setTimeout(() => {
-            confetti({
-              particleCount: 50,
-              angle: 60,
-              spread: 55,
-              origin: { x: 0, y: 0.7 }
-            });
-            confetti({
-              particleCount: 50,
-              angle: 120,
-              spread: 55,
-              origin: { x: 1, y: 0.7 }
-            });
-          }, 280);
         }
       } catch (e) {}
     }
@@ -1055,7 +623,7 @@
         peer.on('open', () => {
           updateLobbyBadge();
           renderLobbyModal();
-          triggerRumble([60]);
+          triggerRumble('light', false);
           showToast(`Lobby ${code} aktiv! Du bist drin (1/4).`);
         });
 
@@ -1143,7 +711,7 @@
             state.lobby.role = 'client';
             state.lobby.code = code;
             updateLobbyBadge();
-            triggerRumble([60, 40, 80]);
+            triggerRumble('medium', false);
             conn.send({
               type: 'JOIN',
               player: { id: myId, name: playerName, sips: 0 }
@@ -1153,8 +721,11 @@
           });
 
           conn.on('data', (msg) => {
-            if (msg && msg.type === 'SYNC_STATE') {
+            if (!msg || !msg.type) return;
+            if (msg.type === 'SYNC_STATE') {
               applySyncedState(msg.payload);
+            } else if (msg.type === 'RUMBLE') {
+              triggerRumble(msg.strength, false);
             }
           });
 
@@ -1203,6 +774,8 @@
         broadcastState();
         renderLobbyModal();
         render();
+      } else if (msg.type === 'RUMBLE_REQUEST') {
+        triggerRumble(msg.strength, true);
       } else if (msg.type === 'DBD_PREDICTION') {
         if (!state.dbd.predictions[msg.playerId]) {
           state.dbd.predictions[msg.playerId] = {};
@@ -1212,7 +785,7 @@
         render();
       } else if (msg.type === 'DBD_READY') {
         state.dbd.readyPlayers[msg.playerId] = Boolean(msg.ready);
-        if (state.dbd.mode === 'killer' && state.dbd.killerSubMode === 'spectator' && areAllDbdPlayersReady()) {
+        if (areAllDbdPlayersReady()) {
           startDbdLiveRound();
         } else {
           broadcastState();
@@ -1228,6 +801,8 @@
           broadcastState();
           render();
         }
+      } else if (msg.type === 'DBD_NEW_ROUND') {
+        startSameModeNewRound(false);
       }
     }
 
@@ -1247,7 +822,6 @@
       if (state.lobby.role !== 'host') return;
       const payload = {
         view: state.view,
-        selectedFranchiseId: state.selectedFranchiseId,
         selectedGameId: state.selectedGameId,
         players: state.players,
         dbd: state.dbd
@@ -1261,149 +835,111 @@
 
     function applySyncedState(payload) {
       if (!payload) return;
+      const prevPhase = state.dbd?.phase;
       state.view = payload.view;
-      state.selectedFranchiseId = payload.selectedFranchiseId;
       state.selectedGameId = payload.selectedGameId;
       state.players = payload.players;
       state.dbd = payload.dbd;
       updatePlayerBadge();
       renderLobbyModal();
       render();
-    }
-
-    function toggleLobbyModal(show) {
-      const modal = document.getElementById('lobby-modal');
-      if (show) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        renderLobbyModal();
-      } else {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+      if (prevPhase !== 'leaderboard' && state.dbd?.phase === 'leaderboard') {
+        recordCurrentMatchToArchive();
       }
     }
 
-    function renderLobbyModal() {
-      const body = document.getElementById('lobby-modal-body');
-      if (!body) return;
+    function updatePlayerBadge() {
+      const badge = document.getElementById('player-count-badge');
+      if (badge) {
+        badge.textContent = `${state.players.length}`;
+      }
+    }
+
+    function triggerRumble(pattern = [120, 60, 180]) {
+      try {
+        if (typeof navigator !== 'undefined') {
+          const vibFn = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate;
+          if (typeof vibFn === 'function') {
+            const normalizedPattern = Array.isArray(pattern)
+              ? pattern.map(ms => Math.max(20, Number(ms) || 50))
+              : [Math.max(40, Number(pattern) || 120)];
+            vibFn.call(navigator, normalizedPattern);
+          }
+        }
+      } catch (e) {}
+    }
+
+    function triggerVictoryConfetti() {
+      triggerRumble([100, 50, 100, 50, 250]);
+      try {
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 85,
+            spread: 70,
+            origin: { y: 0.65 },
+            colors: ['#a855f7', '#06b6d4', '#ec4899', '#f59e0b', '#10b981']
+          });
+          setTimeout(() => {
+            confetti({
+              particleCount: 50,
+              angle: 60,
+              spread: 55,
+              origin: { x: 0, y: 0.7 }
+            });
+            confetti({
+              particleCount: 50,
+              angle: 120,
+              spread: 55,
+              origin: { x: 1, y: 0.7 }
+            });
+          }, 280);
+        }
+      } catch (e) {}
+    }
+
+    function updateLobbyBadge() {
+      const dot = document.getElementById('lobby-status-dot');
+      const txt = document.getElementById('lobby-btn-text');
+      if (!dot || !txt) return;
 
       if (state.lobby.role === 'host') {
-        body.innerHTML = `
-          <div class="bg-gradient-to-br from-purple-950/60 to-zinc-900 border border-purple-500/40 rounded-2xl p-4 text-center">
-            <p class="text-xs uppercase tracking-widest text-purple-300 font-bold mb-1">Dein 4-Stelliger Lobby-Code</p>
-            <div class="font-display font-bold text-5xl tracking-[0.25em] text-white my-2 select-all">${state.lobby.code}</div>
-            <p class="text-xs text-zinc-400">Deine Freunde geben diesen Code auf ihrem Handy unter „Lobby“ ein.</p>
-          </div>
-
-          <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3.5">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Spieler in der Lobby</span>
-              <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
-                ${state.players.length} / max. 4 Spieler
-              </span>
-            </div>
-            <div class="space-y-1.5">
-              ${state.players.map((p, idx) => `
-                <div class="flex items-center justify-between bg-zinc-950/80 px-3 py-2 rounded-xl border border-zinc-800/80">
-                  <span class="text-sm font-semibold text-zinc-100">${p.name}</span>
-                  <span class="text-[11px] font-bold ${idx === 0 ? 'text-purple-400' : 'text-cyan-400'}">${idx === 0 ? 'HOST' : 'VERBUNDEN'}</span>
-                </div>
-              `).join('')}
-            </div>
-            <p class="text-[11px] text-zinc-500 mt-2.5">Du kannst jederzeit auch solo oder mit 2–4 Spielern direkt ein Spiel starten.</p>
-          </div>
-
-          <button onclick="disconnectLobby()" class="w-full py-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold uppercase tracking-wider transition">
-            Lobby schließen
-          </button>
-        `;
-        return;
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0';
+        txt.textContent = `${state.lobby.code} (${state.players.length}/4)`;
+      } else if (state.lobby.role === 'client') {
+        dot.className = 'w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0';
+        txt.textContent = `#${state.lobby.code}`;
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-zinc-500 shrink-0';
+        txt.textContent = 'Lobby';
       }
-
-      if (state.lobby.role === 'client') {
-        body.innerHTML = `
-          <div class="bg-cyan-950/40 border border-cyan-500/40 rounded-2xl p-4 text-center">
-            <span class="inline-block text-[11px] font-bold uppercase tracking-widest bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-full mb-2">Verbunden</span>
-            <h3 class="font-display font-bold text-2xl text-white">Lobby #${state.lobby.code}</h3>
-            <p class="text-xs text-zinc-400 mt-1">Du spielst als <strong class="text-white">${state.lobby.myName}</strong> (${state.players.length}/4 Spieler in Lobby).</p>
-          </div>
-
-          <button onclick="disconnectLobby()" class="w-full py-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold uppercase tracking-wider transition">
-            Lobby verlassen
-          </button>
-        `;
-        return;
-      }
-
-      body.innerHTML = `
-        <div>
-          <label class="block text-xs font-semibold text-zinc-400 mb-1.5">Dein Spielername</label>
-          <input id="lobby-player-name" type="text" value="${state.lobby.myName}" maxlength="16" placeholder="Dein Name..."
-            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500" />
-        </div>
-
-        <div class="grid grid-cols-1 gap-3 pt-1">
-          <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4">
-            <h3 class="font-display font-bold text-lg text-white mb-1">Neue Lobby hosten</h3>
-            <p class="text-xs text-zinc-400 mb-3">Generiert einen 4-stelligen Code für bis zu 4 Handys (oder zum Solo-Hosten).</p>
-            <button onclick="hostLobby()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold uppercase tracking-wider transition active:scale-95">
-              Lobby-Code generieren
-            </button>
-          </div>
-
-          <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4">
-            <h3 class="font-display font-bold text-lg text-white mb-1">Lobby beitreten</h3>
-            <p class="text-xs text-zinc-400 mb-3">Gib den 4-stelligen Code vom Host ein.</p>
-            <div class="flex gap-2">
-              <input id="join-lobby-code" type="tel" maxlength="4" placeholder="1234"
-                class="w-28 text-center font-display font-bold text-xl tracking-widest bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500" />
-              <button onclick="joinLobby()" class="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold uppercase tracking-wider transition active:scale-95">
-                Beitreten
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
     }
 
     // =========================================================================
-    // 5. NAVIGATION, SUCHE & SQUAD-VERWALTUNG
+    // 5. NAVIGATION, PROFIL-ARCHIV & SQUAD-VERWALTUNG
     // =========================================================================
+    let selectedArchiveEntryId = null;
+
     function goHome() {
       state.view = 'hub';
-      state.selectedFranchiseId = null;
       state.selectedGameId = null;
-      state.currentCard = null;
+      selectedArchiveEntryId = null;
       if (state.lobby.role === 'host') broadcastState();
       render();
     }
 
-    function handleSearch(val) {
-      state.searchQuery = val;
+    function openProfileView() {
+      state.view = 'profile';
+      selectedArchiveEntryId = null;
       render();
     }
 
-    function setGenreFilter(genre) {
-      state.selectedGenre = genre;
+    function toggleArchiveEntry(entryId) {
+      selectedArchiveEntryId = selectedArchiveEntryId === entryId ? null : entryId;
       render();
-    }
-
-    function getFilteredGames() {
-      const q = state.searchQuery.trim().toLowerCase();
-      return GAMES_DB.filter(g => {
-        const matchesGenre = state.selectedGenre === 'all' || g.genre === state.selectedGenre;
-        if (!matchesGenre) return false;
-        if (!q) return true;
-        if (g.title.toLowerCase().includes(q) || g.subtitle.toLowerCase().includes(q)) return true;
-        if (g.isFranchise && Array.isArray(g.subGames)) {
-          return g.subGames.some(sub => sub.title.toLowerCase().includes(q) || sub.tag.toLowerCase().includes(q));
-        }
-        return false;
-      });
     }
 
     function openGameOrFranchise(id) {
-      const item = GAMES_DB.find(g => g.id === id);
+      const item = GAME_MODULES.find(g => g.id === id);
       if (!item) return;
 
       if (item.isFranchise) {
@@ -1555,6 +1091,15 @@
       return state.dbd.liveStats.byPlayer[playerId];
     }
 
+    /**
+     * Gezielte DOM-Aktualisierung ohne komplettes Neuzeichnen des gesamten Screens,
+     * damit beim Eintragen von Stats kein Flackern entsteht.
+     */
+    function patchLiveCounterText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = String(value);
+    }
+
     let toastTimer = null;
     function showToast(message) {
       const toast = document.getElementById('toast');
@@ -1569,11 +1114,11 @@
       toastTimer = setTimeout(() => {
         toast.classList.remove('opacity-100', 'translate-y-0');
         toast.classList.add('opacity-0', 'translate-y-4');
-      }, 2800);
+      }, 2400);
     }
 
     // =========================================================================
-    // 6. DEAD BY DAYLIGHT LOGIK (SURVIVOR, KILLER, VORHERSAGEN & AUSWERTUNG)
+    // 6. DEAD BY DAYLIGHT LOGIK (SURVIVOR, KILLER, ZUSCHAUER & AUSWERTUNG)
     // =========================================================================
     function resetDbdMatch(targetPhase = 'role', rotateKiller = false) {
       const byPlayer = {};
@@ -1596,6 +1141,7 @@
         killerSubMode: state.dbd.killerSubMode || 'solo',
         killerPlayerIndex: nextKillerIndex,
         activePredictPlayerIndex: 0,
+        activeTargetStep: 0,
         activeLivePlayerId: state.players[0]?.id || '',
         predictions: {},
         readyPlayers: {},
@@ -1617,6 +1163,73 @@
       };
       if (state.lobby.role === 'host') broadcastState();
       render();
+    }
+
+    /**
+     * Startet eine komplett neue Runde im exakt aktuellen Modus (Survivor / Killer / Zuschauer)
+     * und rotiert den Killer nur dann, wenn der aktuelle Modus ein Killer-Modus ist.
+     */
+    function startSameModeNewRound(fromRemote = false) {
+      if (state.lobby.role === 'client' && !fromRemote) {
+        state.lobby.hostConn.send({ type: 'DBD_NEW_ROUND' });
+        return;
+      }
+
+      const currentMode = state.dbd.mode || 'survivor';
+      const currentSubMode = state.dbd.killerSubMode || 'solo';
+      const shouldRotateKiller = currentMode === 'killer';
+
+      const byPlayer = {};
+      state.players.forEach(p => {
+        byPlayer[p.id] = {
+          missedChecks: 0,
+          hooks: 0,
+          stunsBlinds: 0,
+          healsUnhooks: 0
+        };
+      });
+
+      const nextKillerIndex = shouldRotateKiller && state.players.length > 0
+        ? (state.dbd.killerPlayerIndex + 1) % state.players.length
+        : state.dbd.killerPlayerIndex;
+
+      state.dbd = {
+        phase: 'predict',
+        mode: currentMode,
+        killerSubMode: currentSubMode,
+        killerPlayerIndex: nextKillerIndex,
+        activePredictPlayerIndex: 0,
+        activeTargetStep: 0,
+        activeLivePlayerId: state.players[0]?.id || '',
+        predictions: {},
+        readyPlayers: {},
+        liveStats: {
+          byPlayer,
+          gensRepaired: 0,
+          survivorsHooked: 0,
+          survivorsKilled: 0,
+          killerStunnedBlinded: 0,
+          survivorsEscaped: 0
+        },
+        actualOutcome: {
+          killer: DBD_KILLERS[0],
+          map: DBD_MAPS[0],
+          exhaustionPerk: DBD_EXHAUSTION_PERKS[0].id
+        },
+        reviewReadyPlayers: {},
+        results: []
+      };
+
+      const participants = getDbdParticipants();
+      participants.forEach(p => {
+        getPredictionTargetsFor(p.id).forEach(t => getOrCreatePrediction(p.id, t.id));
+        ensureDbdPlayerStats(p.id);
+      });
+
+      triggerRumble('medium', true);
+      if (state.lobby.role === 'host') broadcastState();
+      render();
+      showToast('Neue Runde gestartet!');
     }
 
     function getCurrentKillerPlayer() {
@@ -1660,6 +1273,7 @@
       state.dbd.killerSubMode = killerSubMode;
       state.dbd.phase = 'predict';
       state.dbd.activePredictPlayerIndex = 0;
+      state.dbd.activeTargetStep = 0;
       state.dbd.readyPlayers = {};
       state.dbd.reviewReadyPlayers = {};
 
@@ -1670,6 +1284,7 @@
         ensureDbdPlayerStats(p.id);
       });
 
+      triggerRumble('light', true);
       if (state.lobby.role === 'host') broadcastState();
       render();
     }
@@ -1702,12 +1317,28 @@
       render();
     }
 
-    function markPlayerDbdReady(playerId) {
-      state.dbd.readyPlayers[playerId] = true;
+    /**
+     * Step-by-Step Tipp-Flow: erst nacheinander jeden Ziel-Spieler abarbeiten,
+     * danach erst als "Bereit" markieren. Bei 3+ Spielern im Offline-Modus öffnet sich
+     * danach das nächste Spieler-Pop-Up / Step für den nächsten Spieler.
+     */
+    function advancePredictionOrReady(predictorId, totalTargets) {
+      const nextStep = (state.dbd.activeTargetStep || 0) + 1;
+      if (nextStep < totalTargets) {
+        state.dbd.activeTargetStep = nextStep;
+        triggerRumble('light', false);
+        render();
+        return;
+      }
+
+      state.dbd.readyPlayers[predictorId] = true;
+      state.dbd.activeTargetStep = 0;
+      triggerRumble('medium', true);
+
       if (state.lobby.role === 'client') {
         state.lobby.hostConn.send({
           type: 'DBD_READY',
-          playerId,
+          playerId: predictorId,
           ready: true
         });
         render();
@@ -1727,6 +1358,8 @@
       const participants = getDbdParticipants();
       if (state.dbd.activePredictPlayerIndex < participants.length - 1) {
         state.dbd.activePredictPlayerIndex++;
+        state.dbd.activeTargetStep = 0;
+        showToast(`Jetzt tippt ${participants[state.dbd.activePredictPlayerIndex].name}!`);
         render();
       } else {
         startDbdLiveRound();
@@ -1740,6 +1373,7 @@
         ? killerPlayer.id
         : (state.players[0]?.id || '');
       state.players.forEach(p => ensureDbdPlayerStats(p.id));
+      triggerRumble('medium', true);
       if (state.lobby.role === 'host') broadcastState();
       render();
       showToast('Alle bereit! Runde gestartet!');
@@ -1779,7 +1413,8 @@
       if (state.dbd.mode === 'survivor') {
         if (action === 'missedCheck') {
           pStats.missedChecks++;
-          triggerRumble([140, 60, 140]);
+          triggerRumble('medium', !fromRemote);
+          patchLiveCounterText('live-count-missed', pStats.missedChecks);
           if (!fromRemote) showToast(`${pName}: Skillcheck verfehlt (+1 Shot)`);
         } else if (action === 'hook') {
           if (pStats.hooks >= 3) {
@@ -1787,52 +1422,61 @@
             return;
           }
           pStats.hooks++;
+          patchLiveCounterText('live-count-hooks', `${pStats.hooks}/3`);
           if (pStats.hooks === 3) {
-            triggerRumble([250, 80, 250, 80, 350]);
+            triggerRumble('heavy', !fromRemote);
             if (!fromRemote) showToast(`${pName}: 3. Haken = TOD (+3 Shots)!`);
           } else {
-            triggerRumble([150, 70, 150]);
+            triggerRumble('medium', !fromRemote);
             if (!fromRemote) showToast(`${pName}: Haken ${pStats.hooks}/3 (+1 Shot)`);
           }
         } else if (action === 'stunBlind') {
           pStats.stunsBlinds++;
-          triggerRumble([45]);
+          triggerRumble('light', !fromRemote);
+          patchLiveCounterText('live-count-stun', pStats.stunsBlinds);
+          patchLiveCounterText('live-player-points', (pStats.stunsBlinds + pStats.healsUnhooks) * 10);
           if (!fromRemote) showToast(`${pName}: Killer gestunt/geblendet (+10 Pkt)`);
         } else if (action === 'healUnhook') {
           pStats.healsUnhooks++;
-          triggerRumble([45]);
+          triggerRumble('light', !fromRemote);
+          patchLiveCounterText('live-count-heal', pStats.healsUnhooks);
+          patchLiveCounterText('live-player-points', (pStats.stunsBlinds + pStats.healsUnhooks) * 10);
           if (!fromRemote) showToast(`${pName}: Geheilt / Vom Haken gerettet (+10 Pkt)`);
         }
       } else {
         if (action === 'genRepaired') {
           if (s.gensRepaired >= 5) return;
           s.gensRepaired++;
-          triggerRumble([140, 60, 140]);
+          triggerRumble('medium', !fromRemote);
+          patchLiveCounterText('killer-count-gens', `${s.gensRepaired}/5`);
           if (!fromRemote) showToast(`Generator repariert (${s.gensRepaired}/5 -> +1 Shot)`);
         } else if (action === 'survHooked') {
           if (s.survivorsHooked >= 12) return;
           s.survivorsHooked++;
-          triggerRumble([45]);
+          triggerRumble('light', !fromRemote);
+          patchLiveCounterText('killer-count-hooks', s.survivorsHooked);
           if (!fromRemote) showToast('Survivor angehakt (+5 Punkte)');
         } else if (action === 'survKilled') {
           if (s.survivorsKilled >= 4) return;
           s.survivorsKilled++;
-          triggerRumble([50, 30, 70]);
+          triggerRumble('light', !fromRemote);
+          patchLiveCounterText('killer-count-kills', `${s.survivorsKilled}/4`);
           if (!fromRemote) showToast(`Survivor gekillt (${s.survivorsKilled}/4 -> +10 Punkte)`);
         } else if (action === 'killerStunned') {
           s.killerStunnedBlinded++;
-          triggerRumble([180, 70, 180]);
+          triggerRumble('heavy', !fromRemote);
+          patchLiveCounterText('killer-count-stun', s.killerStunnedBlinded);
           if (!fromRemote) showToast('Stun / Blind kassiert (+2 Shots)');
         } else if (action === 'survEscaped') {
           if (s.survivorsEscaped >= 4) return;
           s.survivorsEscaped++;
-          triggerRumble([150, 60, 150]);
+          triggerRumble('medium', !fromRemote);
+          patchLiveCounterText('killer-count-escape', `${s.survivorsEscaped}/4`);
           if (!fromRemote) showToast(`Survivor entkommen (${s.survivorsEscaped}/4 -> +1 Shot)`);
         }
       }
 
       if (state.lobby.role === 'host') broadcastState();
-      render();
     }
 
     function adjustReviewPlayerStat(playerId, field, delta, min = 0, max = 99) {
@@ -1879,6 +1523,11 @@
       evaluateDbdMatch();
     }
 
+    /**
+     * Berechnet Punkte und Shots.
+     * Wenn eine Vorhersage (Skillchecks / Haken / Entkommene / Gens) exakt richtig geraten wurde,
+     * werden die dafür gewetteten Shots vom Shot-Counter abgezogen (man muss dafür nicht trinken).
+     */
     function evaluateDbdMatch() {
       const s = state.dbd.liveStats;
       const actual = state.dbd.actualOutcome;
@@ -1945,20 +1594,24 @@
               breakdown.push(`${prefix}Map falsch: +1 Shot`);
             }
 
-            if (Number(pred.missedChecks) === tStats.missedChecks) {
+            const betMissed = Number(pred.missedChecks) || 0;
+            if (betMissed === tStats.missedChecks) {
               points += 10;
-              breakdown.push(`${prefix}Skillchecks exakt (${tStats.missedChecks}): +10 Pkt`);
+              shots = Math.max(0, shots - betMissed);
+              breakdown.push(`${prefix}Skillchecks exakt (${tStats.missedChecks}): +10 Pkt & ${betMissed} gewettete Shots gestrichen`);
             } else {
               shots += 1;
-              breakdown.push(`${prefix}Skillchecks daneben (Tipp: ${pred.missedChecks}, Ist: ${tStats.missedChecks}): +1 Shot`);
+              breakdown.push(`${prefix}Skillchecks daneben (Tipp: ${betMissed}, Ist: ${tStats.missedChecks}): +1 Shot`);
             }
 
-            if (Number(pred.hooks) === tStats.hooks) {
+            const betHooks = Number(pred.hooks) || 0;
+            if (betHooks === tStats.hooks) {
               points += 10;
-              breakdown.push(`${prefix}Haken exakt (${tStats.hooks}): +10 Pkt`);
+              shots = Math.max(0, shots - betHooks);
+              breakdown.push(`${prefix}Haken exakt (${tStats.hooks}): +10 Pkt & ${betHooks} gewettete Shots gestrichen`);
             } else {
               shots += 1;
-              breakdown.push(`${prefix}Haken daneben (Tipp: ${pred.hooks}, Ist: ${tStats.hooks}): +1 Shot`);
+              breakdown.push(`${prefix}Haken daneben (Tipp: ${betHooks}, Ist: ${tStats.hooks}): +1 Shot`);
             }
           });
         } else {
@@ -2014,20 +1667,24 @@
               breakdown.push(`${prefix}Map falsch: +1 Shot`);
             }
 
-            if (Number(pred.escaped) === s.survivorsEscaped) {
+            const betEscaped = Number(pred.escaped) || 0;
+            if (betEscaped === s.survivorsEscaped) {
               points += 10;
-              breakdown.push(`${prefix}Entkommene Survivor exakt (${s.survivorsEscaped}/4): +10 Pkt`);
+              shots = Math.max(0, shots - betEscaped);
+              breakdown.push(`${prefix}Entkommene Survivor exakt (${s.survivorsEscaped}/4): +10 Pkt & ${betEscaped} gewettete Shots gestrichen`);
             } else {
               shots += 1;
-              breakdown.push(`${prefix}Entkommene Survivor falsch (Tipp: ${pred.escaped}/4): +1 Shot`);
+              breakdown.push(`${prefix}Entkommene Survivor falsch (Tipp: ${betEscaped}/4): +1 Shot`);
             }
 
-            if (Number(pred.gens) === s.gensRepaired) {
+            const betGens = Number(pred.gens) || 0;
+            if (betGens === s.gensRepaired) {
               points += 10;
-              breakdown.push(`${prefix}Generatoren exakt (${s.gensRepaired}/5): +10 Pkt`);
+              shots = Math.max(0, shots - betGens);
+              breakdown.push(`${prefix}Generatoren exakt (${s.gensRepaired}/5): +10 Pkt & ${betGens} gewettete Shots gestrichen`);
             } else {
               shots += 1;
-              breakdown.push(`${prefix}Generatoren falsch (Tipp: ${pred.gens}/5): +1 Shot`);
+              breakdown.push(`${prefix}Generatoren falsch (Tipp: ${betGens}/5): +1 Shot`);
             }
           });
         }
@@ -2057,82 +1714,47 @@
 
       state.dbd.results = results;
       state.dbd.phase = 'leaderboard';
+      recordCurrentMatchToArchive();
       savePlayers();
       if (state.lobby.role === 'host') broadcastState();
       render();
       setTimeout(() => triggerVictoryConfetti(), 150);
     }
 
-    // =========================================================================
-    // 7. STANDARD SPIEL LOGIK (ANDERE SPIELE IM HUB)
-    // =========================================================================
-    function setActiveTab(tab) {
-      state.activeTab = tab;
-      render();
-    }
+    function recordCurrentMatchToArchive() {
+      const results = state.dbd.results || [];
+      if (results.length === 0) return;
 
-    function setIntensity(level) {
-      state.intensity = level;
-      render();
-    }
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      const modeLabel = state.dbd.mode === 'survivor'
+        ? 'Survivor'
+        : (state.dbd.killerSubMode === 'spectator' ? 'Killer (Zuschauer)' : 'Killer (Solo)');
 
-    function getScaledSips(baseSips) {
-      if (state.intensity === 'chill') return Math.max(1, baseSips - 1);
-      if (state.intensity === 'hardcore') return baseSips + 2;
-      return baseSips;
-    }
+      const entryId = `match-${Date.now()}-${results.map(r => r.playerId).join('-')}`;
+      if (state.profileArchive.some(item => item.id === entryId)) return;
 
-    function triggerRule(sips, ruleText) {
-      const scaled = getScaledSips(sips);
-      triggerRumble([120, 60, 160]);
-      if (state.players.length === 1) {
-        adjustPlayerSips(state.players[0].id, scaled);
-        showToast(`${state.players[0].name} trinkt ${scaled} ${scaled === 1 ? 'Schluck' : 'Schlucke'}!`);
-      } else {
-        showToast(`Event aktiv! ${scaled} ${scaled === 1 ? 'Schluck' : 'Schlucke'} – wähle unten wen es trifft.`);
-      }
-      state.pendingDrink = { sips: scaled, text: ruleText };
-      render();
-    }
+      const totalShotsInRound = results.reduce((sum, r) => sum + (Number(r.shots) || 0), 0);
 
-    function assignPendingDrink(playerId) {
-      if (!state.pendingDrink) return;
-      const { sips } = state.pendingDrink;
-      if (playerId === 'ALL') {
-        state.players.forEach(p => p.sips += sips);
-        savePlayers();
-        showToast(`Alle trinken ${sips} ${sips === 1 ? 'Schluck' : 'Schlucke'}! Prost!`);
-      } else {
-        const player = state.players.find(p => p.id === playerId);
-        if (player) {
-          player.sips += sips;
-          savePlayers();
-          showToast(`${player.name} bekommt +${sips} ${sips === 1 ? 'Schluck' : 'Schlucke'}!`);
-        }
-      }
-      state.pendingDrink = null;
-      render();
-    }
-
-    function dismissPendingDrink() {
-      state.pendingDrink = null;
-      render();
-    }
-
-    function drawRandomCard() {
-      const game = getActiveGame();
-      if (!game || !game.cards || game.cards.length === 0) return;
-      let nextCard = game.cards[Math.floor(Math.random() * game.cards.length)];
-      if (game.cards.length > 1 && nextCard === state.currentCard) {
-        const others = game.cards.filter(c => c !== state.currentCard);
-        nextCard = others[Math.floor(Math.random() * others.length)];
-      }
-      state.currentCard = nextCard;
-      render();
+      state.profileArchive.unshift({
+        id: entryId,
+        dateTime: `${dateStr} - ${timeStr}`,
+        gameName: 'Dead by Daylight',
+        mode: modeLabel,
+        totalShots: totalShotsInRound,
+        leaderboard: results.map((r, idx) => ({
+          rank: idx + 1,
+          name: r.name,
+          points: r.points,
+          shots: r.shots
+        }))
+      });
+      saveArchive();
     }
 
     // =========================================================================
-    // 8. RENDER ENGINE
+    // 7. RENDER ENGINE & VIEWS (HUB, PROFIL-ARCHIV, DBD)
     // =========================================================================
     function safeCreateIcons() {
       try {
@@ -2143,132 +1765,149 @@
     }
 
     function renderHubView() {
-      const filtered = getFilteredGames();
-      const genres = [
-        { id: 'all', label: 'Alle Games' },
-        { id: 'horror', label: 'Horror' },
-        { id: 'shooter', label: 'Shooter' },
-        { id: 'coop', label: 'Koop-Chaos' },
-        { id: 'stealth', label: 'Stealth' }
-      ];
-
       return `
         <div class="space-y-4 animate-pop">
-          <div class="glass-card rounded-3xl p-4 sm:p-5 border border-purple-500/20 space-y-3">
-            <div class="flex items-center justify-between gap-2">
-              <div>
-                <span class="text-[10px] font-bold uppercase tracking-widest text-purple-400">Game-Hub</span>
-                <h2 class="font-display font-bold text-2xl text-white uppercase tracking-wide">Wähle dein Spiel</h2>
-              </div>
-              <span class="text-xs font-semibold text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full">
-                ${filtered.length} Titel
-              </span>
+          <div class="glass-card rounded-3xl p-4 sm:p-5 border border-purple-500/20 flex items-center justify-between gap-2">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-purple-400">Game-Hub</span>
+              <h2 class="font-display font-bold text-2xl text-white uppercase tracking-wide">Wähle dein Spiel</h2>
             </div>
-
-            <div class="relative">
-              <i data-lucide="search" class="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-              <input
-                type="text"
-                value="${state.searchQuery.replace(/"/g, '&quot;')}"
-                oninput="handleSearch(this.value)"
-                placeholder="Spiel oder Teil suchen (z. B. RE 7, MW2, Phasmo)..."
-                class="w-full bg-zinc-900/90 border border-zinc-700/80 rounded-2xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
-              />
-            </div>
-
-            <div class="flex gap-2 overflow-x-auto no-scrollbar pt-0.5">
-              ${genres.map(g => {
-                const active = state.selectedGenre === g.id;
-                return `
-                  <button
-                    onclick="setGenreFilter('${g.id}')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition active:scale-95 ${
-                      active
-                        ? 'bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow'
-                        : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
-                    }">
-                    ${g.label}
-                  </button>
-                `;
-              }).join('')}
-            </div>
+            <span class="text-xs font-semibold text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full">
+              ${GAME_MODULES.length} Titel
+            </span>
           </div>
 
-          ${filtered.length === 0 ? `
-            <div class="glass-card rounded-3xl p-8 text-center border border-zinc-800 space-y-2">
-              <p class="text-sm font-semibold text-zinc-300">Keine passenden Spiele gefunden.</p>
-              <button onclick="state.searchQuery=''; state.selectedGenre='all'; render();" class="text-xs text-purple-400 hover:underline font-semibold">
-                Filter zurücksetzen
-              </button>
-            </div>
-          ` : `
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              ${filtered.map(game => `
-                <div
-                  onclick="openGameOrFranchise('${game.id}')"
-                  class="glass-card hover:bg-zinc-900/90 border ${game.borderAccent || 'border-zinc-800'} rounded-3xl p-4 cursor-pointer transition active:scale-[0.98] relative overflow-hidden flex flex-col justify-between gap-3"
-                >
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${game.accent || 'from-purple-600 to-zinc-900'} flex items-center justify-center shrink-0 shadow-lg">
-                        <i data-lucide="${game.icon || 'gamepad-2'}" class="w-6 h-6 text-white"></i>
-                      </div>
-                      <div class="min-w-0">
-                        <h3 class="font-display font-bold text-xl text-white uppercase tracking-wide truncate">${game.title}</h3>
-                        <p class="text-xs text-zinc-400 truncate">${game.subtitle}</p>
-                      </div>
-                    </div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-300 shrink-0">
-                      ${game.badge || game.genre}
-                    </span>
+          <div class="grid grid-cols-1 gap-3">
+            ${GAME_MODULES.map(game => `
+              <div
+                onclick="openGameOrFranchise('${game.id}')"
+                class="glass-card hover:bg-zinc-900/90 border ${game.borderAccent || 'border-zinc-800'} rounded-3xl p-5 cursor-pointer transition active:scale-[0.98] flex items-center justify-between gap-3"
+              >
+                <div class="flex items-center gap-3.5 min-w-0">
+                  <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${game.accent} flex items-center justify-center shrink-0 shadow-lg">
+                    <i data-lucide="${game.icon}" class="w-6 h-6 text-white"></i>
                   </div>
-
-                  <div class="flex items-center justify-between pt-2 border-t border-zinc-800/70 text-xs text-zinc-400">
-                    <span>${game.isFranchise ? 'Franchise-Ordner öffnen' : (game.isCustomDbd ? 'Modus & Vorhersagen starten' : 'Regeln & Karten öffnen')}</span>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-400"></i>
+                  <div class="min-w-0">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">${game.badge}</span>
+                    <h3 class="font-display font-bold text-2xl text-white uppercase tracking-wide truncate">${game.title}</h3>
+                    <p class="text-xs text-zinc-400 truncate">${game.subtitle}</p>
                   </div>
                 </div>
-              `).join('')}
-            </div>
-          `}
+                <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-400 shrink-0"></i>
+              </div>
+            `).join('')}
+          </div>
         </div>
       `;
     }
 
-    function renderFranchiseView() {
-      const franchise = GAMES_DB.find(g => g.id === state.selectedFranchiseId);
-      if (!franchise || !Array.isArray(franchise.subGames)) return renderHubView();
+    function renderProfileView() {
+      const roundsPlayed = state.profileArchive.length;
+      const myPlayer = state.players.find(p => p.id === state.lobby.myPlayerId) || state.players[0];
+      const shotsDrunk = myPlayer ? Number(myPlayer.sips) || 0 : 0;
+
+      const modeCounts = {};
+      state.profileArchive.forEach(entry => {
+        modeCounts[entry.mode] = (modeCounts[entry.mode] || 0) + 1;
+      });
+      let mostPlayed = 'Dead by Daylight';
+      let topCount = 0;
+      Object.keys(modeCounts).forEach(m => {
+        if (modeCounts[m] > topCount) {
+          topCount = modeCounts[m];
+          mostPlayed = `DBD · ${m}`;
+        }
+      });
 
       return `
         <div class="space-y-4 animate-pop">
           <div class="flex items-center justify-between gap-2">
             <button onclick="goHome()" class="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 px-3.5 py-2 rounded-xl transition active:scale-95">
               <i data-lucide="arrow-left" class="w-4 h-4"></i>
-              <span>Alle Games</span>
+              <span>Zurück</span>
             </button>
-            <span class="text-xs font-bold uppercase tracking-wider text-purple-300 bg-purple-500/10 border border-purple-500/30 px-3 py-1 rounded-full">
-              ${franchise.subGames.length} Teile
-            </span>
           </div>
 
-          <div class="glass-card rounded-3xl p-5 border ${franchise.borderAccent || 'border-zinc-800'}">
-            <h2 class="font-display font-bold text-2xl sm:text-3xl text-white uppercase tracking-wide">${franchise.title}</h2>
-            <p class="text-xs text-zinc-400 mt-1">${franchise.subtitle}</p>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            ${franchise.subGames.map(sub => `
-              <div
-                onclick="openSubGame('${franchise.id}', '${sub.id}')"
-                class="glass-card hover:bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 rounded-3xl p-4 cursor-pointer transition active:scale-[0.98] flex items-center justify-between gap-3"
-              >
-                <div class="min-w-0">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">${sub.tag}</span>
-                  <h3 class="font-bold text-base text-white mt-0.5 truncate">${sub.title}</h3>
-                </div>
-                <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-400 shrink-0"></i>
+          <!-- Profil Banner -->
+          <div class="glass-card rounded-3xl p-5 border border-purple-500/30 space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center shadow-lg">
+                <i data-lucide="user-check" class="w-6 h-6 text-white"></i>
               </div>
-            `).join('')}
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-purple-400">Spieler-Banner</span>
+                <h2 class="font-display font-bold text-2xl text-white uppercase tracking-wide">
+                  Profil · ${myPlayer ? myPlayer.name : 'Spieler'}
+                </h2>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3">
+                <span class="block text-[10px] uppercase tracking-wider text-zinc-400">Runden gespielt</span>
+                <span class="font-display font-bold text-xl text-white mt-0.5 block">${roundsPlayed}</span>
+              </div>
+              <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3">
+                <span class="block text-[10px] uppercase tracking-wider text-zinc-400">Shots getrunken</span>
+                <span class="font-display font-bold text-xl text-rose-400 mt-0.5 block">${shotsDrunk}</span>
+              </div>
+              <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3">
+                <span class="block text-[10px] uppercase tracking-wider text-zinc-400">Meist gespielt</span>
+                <span class="font-bold text-xs text-cyan-300 mt-1.5 block truncate">${mostPlayed}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Archiv -->
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between px-1">
+              <h3 class="font-display font-bold text-lg uppercase tracking-wider text-white">Runden-Archiv</h3>
+              <span class="text-xs text-zinc-400">${roundsPlayed} Einträge</span>
+            </div>
+
+            ${state.profileArchive.length === 0 ? `
+              <div class="glass-card rounded-3xl p-6 border border-zinc-800 text-center">
+                <p class="text-xs text-zinc-400">Noch keine beendeten Runden im Archiv. Spiele eine Runde Dead by Daylight!</p>
+              </div>
+            ` : state.profileArchive.map(entry => {
+              const isOpen = selectedArchiveEntryId === entry.id;
+              return `
+                <div class="glass-card rounded-2xl border border-zinc-800 overflow-hidden">
+                  <button
+                    onclick="toggleArchiveEntry('${entry.id}')"
+                    class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-zinc-900/70 transition"
+                  >
+                    <span class="font-bold text-sm text-white">[${entry.dateTime}]</span>
+                    <span class="text-xs text-zinc-400 flex items-center gap-1.5">
+                      <span>${entry.mode}</span>
+                      <i data-lucide="${isOpen ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-zinc-400"></i>
+                    </span>
+                  </button>
+
+                  ${isOpen ? `
+                    <div class="px-4 pb-4 pt-2 border-t border-zinc-800/80 space-y-2 animate-pop">
+                      <div class="flex items-center justify-between text-xs">
+                        <span class="text-zinc-400">Spiel</span>
+                        <span class="font-bold text-white">${entry.gameName}</span>
+                      </div>
+                      <div class="flex items-center justify-between text-xs">
+                        <span class="text-zinc-400">Modus</span>
+                        <span class="font-bold text-cyan-300">${entry.mode}</span>
+                      </div>
+                      <div class="pt-1.5 space-y-1">
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-amber-400">Leaderboard</p>
+                        ${(entry.leaderboard || []).map(row => `
+                          <div class="flex items-center justify-between bg-zinc-950/80 border border-zinc-800/80 rounded-xl px-3 py-2 text-xs">
+                            <span class="font-semibold text-zinc-200">#${row.rank} ${row.name}</span>
+                            <span class="font-bold text-rose-400">${row.shots} ${row.shots === 1 ? 'Shot' : 'Shots'}</span>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
       `;
@@ -2287,15 +1926,10 @@
 
       if (state.view === 'hub') {
         container.innerHTML = renderHubView();
-      } else if (state.view === 'franchise') {
-        container.innerHTML = renderFranchiseView();
+      } else if (state.view === 'profile') {
+        container.innerHTML = renderProfileView();
       } else if (state.view === 'game') {
-        const game = getActiveGame();
-        if (game && game.isCustomDbd) {
-          container.innerHTML = renderDbdView();
-        } else {
-          container.innerHTML = renderGameView();
-        }
+        container.innerHTML = renderDbdView();
       }
       safeCreateIcons();
     }
@@ -2333,13 +1967,13 @@
     }
 
     // =========================================================================
-    // 9. DEAD BY DAYLIGHT UI (ALLE 5 PHASEN)
+    // 8. DEAD BY DAYLIGHT UI (MOBILE-FIRST STEP-BY-STEP FLOW)
     // =========================================================================
     function renderDbdView() {
       const dbd = state.dbd;
 
       const topBar = `
-        <div class="flex items-center justify-between gap-2 mb-4">
+        <div class="flex items-center justify-between gap-2 mb-3">
           <button onclick="goHome()" class="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 px-3.5 py-2 rounded-xl transition active:scale-95">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             <span>Menü</span>
@@ -2354,10 +1988,10 @@
 
       if (dbd.phase === 'role') {
         return `
-          <div class="animate-pop space-y-4">
+          <div class="animate-pop space-y-3.5">
             ${topBar}
 
-            <div class="glass-card rounded-3xl p-5 border border-rose-500/30 text-center">
+            <div class="glass-card rounded-3xl p-4 sm:p-5 border border-rose-500/30 text-center">
               <h2 class="font-display font-bold text-2xl sm:text-3xl uppercase tracking-wide text-white">
                 Wählt eure Rolle für die Runde
               </h2>
@@ -2366,24 +2000,22 @@
               </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-3.5">
-              <div onclick="selectDbdMode('survivor')" class="glass-card hover:bg-zinc-900/95 border border-cyan-500/40 rounded-3xl p-5 cursor-pointer transition active:scale-[0.98] relative overflow-hidden">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="flex items-center gap-3.5">
-                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shrink-0">
-                      <i data-lucide="users" class="w-6 h-6 text-cyan-300"></i>
-                    </div>
-                    <div>
-                      <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400">Squad / Party Modus</span>
-                      <h3 class="font-display font-bold text-2xl text-white uppercase">Survivor</h3>
-                      <p class="text-xs text-zinc-400 mt-0.5">Jeder Spieler hat eigene Haken & Stats + eigene Killer-Vorhersage.</p>
-                    </div>
+            <div class="grid grid-cols-1 gap-3">
+              <div onclick="selectDbdMode('survivor')" class="glass-card hover:bg-zinc-900/95 border border-cyan-500/40 rounded-3xl p-4 sm:p-5 cursor-pointer transition active:scale-[0.98] flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3.5">
+                  <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shrink-0">
+                    <i data-lucide="users" class="w-6 h-6 text-cyan-300"></i>
                   </div>
-                  <i data-lucide="chevron-right" class="w-5 h-5 text-cyan-400 mt-1"></i>
+                  <div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400">Squad / Party Modus</span>
+                    <h3 class="font-display font-bold text-2xl text-white uppercase">Survivor</h3>
+                    <p class="text-xs text-zinc-400 mt-0.5">Tipps nacheinander auf Mitspieler + Map & Killer.</p>
+                  </div>
                 </div>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-cyan-400 shrink-0"></i>
               </div>
 
-              <div class="glass-card border border-rose-500/40 rounded-3xl p-5 space-y-3">
+              <div class="glass-card border border-rose-500/40 rounded-3xl p-4 sm:p-5 space-y-3">
                 <div class="flex items-center gap-3.5">
                   <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center shrink-0">
                     <i data-lucide="swords" class="w-6 h-6 text-rose-400"></i>
@@ -2391,11 +2023,11 @@
                   <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-rose-400">The Entity</span>
                     <h3 class="font-display font-bold text-2xl text-white uppercase">Killer</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Vorhersagen zu Entkommenen, Gens & Exhaustion Perks.</p>
+                    <p class="text-xs text-zinc-400 mt-0.5">Solo oder Zuschauer-Wetten auf Gens, Entkommene & Perks.</p>
                   </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2.5 pt-2">
+                <div class="grid grid-cols-2 gap-2.5 pt-1">
                   <button onclick="selectDbdMode('killer', 'solo')" class="py-3 px-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold uppercase tracking-wider transition active:scale-95 flex flex-col items-center gap-1">
                     <span>Solo Komplett</span>
                     <span class="text-[10px] font-normal text-rose-100">Nur du spielst & tippst</span>
@@ -2419,56 +2051,100 @@
           : participants[dbd.activePredictPlayerIndex] || participants[0];
 
         const targets = getPredictionTargetsFor(activePlayer.id);
-        const currentKillerPlayer = getCurrentKillerPlayer();
+        const safeStep = Math.min(dbd.activeTargetStep || 0, Math.max(0, targets.length - 1));
+        const currentTarget = targets[safeStep] || activePlayer;
+        const pred = getOrCreatePrediction(activePlayer.id, currentTarget.id);
         const isAlreadyReady = Boolean(dbd.readyPlayers[activePlayer.id]);
+        const isSelf = currentTarget.id === activePlayer.id;
+
+        const readyCount = participants.filter(p => Boolean(dbd.readyPlayers[p.id])).length;
+
+        const targetLabel = isSelf
+          ? 'Dein eigener Tipp'
+          : `Dein Tipp auf ${currentTarget.name}`;
+
+        const nextActionText = safeStep < targets.length - 1
+          ? `Weiter (${safeStep + 1}/${targets.length})`
+          : (isRemoteClient ? 'Bereit' : (dbd.activePredictPlayerIndex < participants.length - 1 ? `Bereit · Nächster Spieler` : 'Bereit · Runde starten'));
 
         return `
-          <div class="animate-pop space-y-4">
+          <div class="animate-pop space-y-3">
             ${topBar}
 
-            <div class="glass-card rounded-3xl p-5 border border-purple-500/30 space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold uppercase tracking-widest text-purple-400">
-                  Phase 1: Geheime Vorhersagen
+            <div class="glass-card rounded-3xl p-4 sm:p-5 border border-purple-500/30 space-y-3.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">
+                  ${activePlayer.name}
                 </span>
-                ${!isRemoteClient ? `
-                  <span class="text-xs font-semibold text-zinc-400">
-                    Spieler ${dbd.activePredictPlayerIndex + 1} von ${participants.length}
-                  </span>
-                ` : ''}
+                <span class="text-[11px] font-semibold text-zinc-400 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-full">
+                  Bereit: ${readyCount}/${participants.length}
+                </span>
               </div>
 
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <h2 class="font-display font-bold text-2xl text-white">
-                  Tipp von <span class="text-cyan-400">${activePlayer.name}</span>
-                </h2>
-                ${dbd.mode === 'killer' && currentKillerPlayer ? `
-                  <span class="text-xs font-bold px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300">
-                    Killer dieser Runde: ${currentKillerPlayer.name}
-                  </span>
-                ` : ''}
-              </div>
+              ${isRemoteClient && isAlreadyReady ? `
+                <div class="text-center bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-4 space-y-1">
+                  <p class="text-sm text-emerald-300 font-bold">Du bist Bereit!</p>
+                  <p class="text-xs text-zinc-400">Warte bis alle anderen Spieler auf Bereit geklickt haben (${readyCount}/${participants.length})...</p>
+                </div>
+              ` : `
+                <div class="bg-zinc-900/85 border border-zinc-800 rounded-2xl p-3.5 space-y-3">
+                  <div class="flex items-center justify-between">
+                    <h2 class="font-display font-bold text-xl text-amber-300 uppercase">${targetLabel}</h2>
+                    ${targets.length > 1 ? `<span class="text-[11px] text-zinc-400">${safeStep + 1} / ${targets.length}</span>` : ''}
+                  </div>
 
-              ${targets.map(target => {
-                const pred = getOrCreatePrediction(activePlayer.id, target.id);
-                const isSelf = target.id === activePlayer.id;
-                const targetHeading = isSelf
-                  ? 'Dein eigener Tipp'
-                  : `Dein Tipp auf <span class="text-amber-300">${target.name}</span>`;
+                  ${dbd.mode === 'survivor' ? `
+                    <div class="grid grid-cols-2 gap-2.5">
+                      <div class="bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3 text-center">
+                        <span class="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">Skillchecks</span>
+                        <div class="flex items-center justify-center gap-3">
+                          <button onclick="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'missedChecks', Math.max(0, ${Number(pred.missedChecks)} - 1))" class="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-lg active:scale-90">-</button>
+                          <span class="font-display font-bold text-2xl text-white w-7">${pred.missedChecks}</span>
+                          <button onclick="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'missedChecks', Math.min(20, ${Number(pred.missedChecks)} + 1))" class="w-10 h-10 rounded-xl bg-purple-600/40 border border-purple-500/40 font-bold text-lg active:scale-90">+</button>
+                        </div>
+                      </div>
 
-                return `
-                  <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 space-y-4">
-                    <p class="text-xs font-bold uppercase tracking-wider text-zinc-300 border-b border-zinc-800 pb-2">
-                      ${targetHeading}
-                    </p>
+                      <div class="bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3 text-center">
+                        <span class="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">Haken (0–3)</span>
+                        <div class="flex items-center justify-center gap-3">
+                          <button onclick="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'hooks', Math.max(0, ${Number(pred.hooks)} - 1))" class="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-lg active:scale-90">-</button>
+                          <span class="font-display font-bold text-2xl text-white w-7">${pred.hooks}</span>
+                          <button onclick="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'hooks', Math.min(3, ${Number(pred.hooks)} + 1))" class="w-10 h-10 rounded-xl bg-purple-600/40 border border-purple-500/40 font-bold text-lg active:scale-90">+</button>
+                        </div>
+                      </div>
+                    </div>
+                  ` : `
+                    <div class="grid grid-cols-2 gap-2.5">
+                      <div class="bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3 text-center">
+                        <span class="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">Entkommen (0–4)</span>
+                        <div class="flex items-center justify-center gap-3">
+                          <button onclick="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'escaped', Math.max(0, ${Number(pred.escaped)} - 1))" class="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-lg active:scale-90">-</button>
+                          <span class="font-display font-bold text-xl text-white w-9">${pred.escaped}/4</span>
+                          <button onclick="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'escaped', Math.min(4, ${Number(pred.escaped)} + 1))" class="w-10 h-10 rounded-xl bg-rose-600/40 border border-rose-500/40 font-bold text-lg active:scale-90">+</button>
+                        </div>
+                      </div>
 
+                      <div class="bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3 text-center">
+                        <span class="block text-[11px] font-bold uppercase text-zinc-400 mb-1.5">Gens (0–5)</span>
+                        <div class="flex items-center justify-center gap-3">
+                          <button onclick="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'gens', Math.max(0, ${Number(pred.gens)} - 1))" class="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-lg active:scale-90">-</button>
+                          <span class="font-display font-bold text-xl text-white w-9">${pred.gens}/5</span>
+                          <button onclick="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'gens', Math.min(5, ${Number(pred.gens)} + 1))" class="w-10 h-10 rounded-xl bg-rose-600/40 border border-rose-500/40 font-bold text-lg active:scale-90">+</button>
+                        </div>
+                      </div>
+                    </div>
+                  `}
+                </div>
+
+                <!-- Allgemeine Vorhersage -->
+                <div class="bg-zinc-900/85 border border-zinc-800 rounded-2xl p-3.5 space-y-2.5">
+                  <p class="text-[11px] font-bold uppercase tracking-wider text-purple-300">Allgemeine Vorhersage</p>
+                  <div class="grid grid-cols-1 ${dbd.mode === 'survivor' ? 'sm:grid-cols-2' : 'sm:grid-cols-2'} gap-2.5">
                     <div>
-                      <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                        Welche Map kommt? (+20 Pkt & 1 Shot verteilen)
-                      </label>
+                      <label class="block text-[10px] font-bold uppercase text-zinc-400 mb-1">Map</label>
                       <select
-                        onchange="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'map', this.value)"
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-cyan-500"
+                        onchange="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'map', this.value)"
+                        class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
                       >
                         ${DBD_MAPS.map(m => `
                           <option value="${m}" ${pred.map === m ? 'selected' : ''}>${m}</option>
@@ -2478,66 +2154,22 @@
 
                     ${dbd.mode === 'survivor' ? `
                       <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                          Welcher Killer kommt? (+20 Pkt & 1 Shot verteilen)
-                        </label>
+                        <label class="block text-[10px] font-bold uppercase text-zinc-400 mb-1">Killer</label>
                         <select
-                          onchange="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'killer', this.value)"
-                          class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-purple-500"
+                          onchange="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'killer', this.value)"
+                          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500"
                         >
                           ${DBD_KILLERS.map(k => `
                             <option value="${k}" ${pred.killer === k ? 'selected' : ''}>${k}</option>
                           `).join('')}
                         </select>
                       </div>
-
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3.5 text-center">
-                          <span class="block text-[11px] font-bold uppercase text-zinc-400 mb-2">Skillchecks verfehlt</span>
-                          <div class="flex items-center justify-center gap-4">
-                            <button onclick="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'missedChecks', Math.max(0, ${Number(pred.missedChecks)} - 1))" class="w-11 h-11 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-xl active:scale-90">-</button>
-                            <span class="font-display font-bold text-2xl text-white w-9">${pred.missedChecks}</span>
-                            <button onclick="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'missedChecks', Math.min(20, ${Number(pred.missedChecks)} + 1))" class="w-11 h-11 rounded-xl bg-purple-600/40 border border-purple-500/40 font-bold text-xl active:scale-90">+</button>
-                          </div>
-                        </div>
-
-                        <div class="bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3.5 text-center">
-                          <span class="block text-[11px] font-bold uppercase text-zinc-400 mb-2">Male am Haken (0–3)</span>
-                          <div class="flex items-center justify-center gap-4">
-                            <button onclick="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'hooks', Math.max(0, ${Number(pred.hooks)} - 1))" class="w-11 h-11 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-xl active:scale-90">-</button>
-                            <span class="font-display font-bold text-2xl text-white w-9">${pred.hooks}</span>
-                            <button onclick="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'hooks', Math.min(3, ${Number(pred.hooks)} + 1))" class="w-11 h-11 rounded-xl bg-purple-600/40 border border-purple-500/40 font-bold text-xl active:scale-90">+</button>
-                          </div>
-                        </div>
-                      </div>
                     ` : `
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3.5 text-center">
-                          <span class="block text-[11px] font-bold uppercase text-zinc-400 mb-2">Survivor entkommen (0–4)</span>
-                          <div class="flex items-center justify-center gap-4">
-                            <button onclick="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'escaped', Math.max(0, ${Number(pred.escaped)} - 1))" class="w-11 h-11 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-xl active:scale-90">-</button>
-                            <span class="font-display font-bold text-2xl text-white w-11">${pred.escaped}/4</span>
-                            <button onclick="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'escaped', Math.min(4, ${Number(pred.escaped)} + 1))" class="w-11 h-11 rounded-xl bg-rose-600/40 border border-rose-500/40 font-bold text-xl active:scale-90">+</button>
-                          </div>
-                        </div>
-
-                        <div class="bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3.5 text-center">
-                          <span class="block text-[11px] font-bold uppercase text-zinc-400 mb-2">Gens repariert (0–5)</span>
-                          <div class="flex items-center justify-center gap-4">
-                            <button onclick="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'gens', Math.max(0, ${Number(pred.gens)} - 1))" class="w-11 h-11 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-xl active:scale-90">-</button>
-                            <span class="font-display font-bold text-2xl text-white w-11">${pred.gens}/5</span>
-                            <button onclick="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'gens', Math.min(5, ${Number(pred.gens)} + 1))" class="w-11 h-11 rounded-xl bg-rose-600/40 border border-rose-500/40 font-bold text-xl active:scale-90">+</button>
-                          </div>
-                        </div>
-                      </div>
-
                       <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                          Welcher Exhaustion Perk ist im Match? (+20 Pkt & 1 Shot verteilen)
-                        </label>
+                        <label class="block text-[10px] font-bold uppercase text-zinc-400 mb-1">Exhaustion Perk</label>
                         <select
-                          onchange="updateDbdPredictionField('${activePlayer.id}', '${target.id}', 'exhaustionPerk', this.value)"
-                          class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-rose-500"
+                          onchange="updateDbdPredictionField('${activePlayer.id}', '${currentTarget.id}', 'exhaustionPerk', this.value)"
+                          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500"
                         >
                           ${DBD_EXHAUSTION_PERKS.map(perk => `
                             <option value="${perk.id}" ${pred.exhaustionPerk === perk.id ? 'selected' : ''}>${perk.name}</option>
@@ -2546,24 +2178,15 @@
                       </div>
                     `}
                   </div>
-                `;
-              }).join('')}
+                </div>
 
-              <div class="pt-2">
-                ${isRemoteClient ? (isAlreadyReady ? `
-                  <div class="text-center bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-3.5">
-                    <p class="text-xs text-emerald-300 font-bold">Du bist BEREIT! Warte bis alle anderen bereit sind...</p>
-                  </div>
-                ` : `
-                  <button onclick="markPlayerDbdReady('${activePlayer.id}')" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-bold text-sm uppercase tracking-wider shadow-lg transition active:scale-95">
-                    Bereit (Vorhersagen absenden)
-                  </button>
-                `) : `
-                  <button onclick="markPlayerDbdReady('${activePlayer.id}')" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-sm uppercase tracking-wider shadow-lg transition active:scale-95">
-                    Bereit – ${dbd.activePredictPlayerIndex < participants.length - 1 ? `Weiter zu ${participants[dbd.activePredictPlayerIndex + 1].name}` : 'Runde starten'}
-                  </button>
-                `}
-              </div>
+                <button
+                  onclick="advancePredictionOrReady('${activePlayer.id}', ${targets.length})"
+                  class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 text-white font-display font-bold text-base uppercase tracking-wider shadow-lg transition active:scale-95"
+                >
+                  ${nextActionText}
+                </button>
+              `}
             </div>
           </div>
         `;
@@ -2577,42 +2200,37 @@
         const pStats = ensureDbdPlayerStats(activePlayerObj.id);
 
         return `
-          <div class="animate-pop space-y-4">
+          <div class="animate-pop space-y-3">
             ${topBar}
 
             <div class="glass-card rounded-3xl p-4 border border-emerald-500/30 flex items-center justify-between">
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                  <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Match läuft live</span>
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Match läuft live</span>
                 </div>
                 <h2 class="font-display font-bold text-2xl text-white uppercase mt-0.5">
-                  ${dbd.mode === 'survivor' ? 'Survivor Live-Tracker' : 'Killer Live-Tracker'}
+                  ${dbd.mode === 'survivor' ? 'Survivor Live' : 'Killer Live'}
                 </h2>
               </div>
               <span class="text-xs bg-zinc-900 border border-zinc-700 px-3 py-1.5 rounded-xl font-semibold text-zinc-300">
-                ${state.lobby.role !== 'offline' ? 'Schummelschutz aktiv' : 'Tippe Events mit'}
+                ${state.lobby.role !== 'offline' ? 'Eigenes Gerät' : 'Schnell-Tracker'}
               </span>
             </div>
 
             ${dbd.mode === 'survivor' ? `
               ${canSwitchPlayer ? `
-                <div class="glass-card rounded-2xl p-2.5 border border-zinc-800">
-                  <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 px-1 mb-2">
-                    Aktiver Spieler zum Tippen auswählen:
-                  </p>
+                <div class="glass-card rounded-2xl p-2 border border-zinc-800">
                   <div class="flex gap-2 overflow-x-auto no-scrollbar">
                     ${state.players.map(p => {
                       const isSel = p.id === activePlayerObj.id;
-                      const st = ensureDbdPlayerStats(p.id);
                       return `
-                        <button onclick="setActiveLivePlayer('${p.id}')" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 ${
+                        <button onclick="setActiveLivePlayer('${p.id}')" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
                           isSel
-                            ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white'
                             : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
                         }">
                           <span>${p.name}</span>
-                          <span class="text-[10px] px-1.5 py-0.5 rounded bg-black/30">${st.hooks}/3 Haken</span>
                         </button>
                       `;
                     }).join('')}
@@ -2621,133 +2239,95 @@
               ` : ''}
 
               <div class="text-xs text-zinc-400 px-1 flex items-center justify-between">
-                <span>Stats für: <strong class="text-cyan-400">${activePlayerObj.name}</strong></span>
-                <span>Punkte: <strong class="text-emerald-400">${(pStats.stunsBlinds + pStats.healsUnhooks) * 10}</strong></span>
+                <span>Spieler: <strong class="text-cyan-400">${activePlayerObj.name}</strong></span>
+                <span>Punkte: <strong id="live-player-points" class="text-emerald-400">${(pStats.stunsBlinds + pStats.healsUnhooks) * 10}</strong></span>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button onclick="triggerDbdLiveEvent('missedCheck', '${activePlayerObj.id}')" class="glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-4 text-left transition active:scale-95 flex items-center justify-between">
-                  <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">+1 Shot</span>
-                    <h3 class="font-bold text-base text-white mt-0.5">Skillcheck verfehlt</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Generator explodiert / Heal fail</p>
-                  </div>
-                  <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex flex-col items-center justify-center">
-                    <span class="font-display font-bold text-xl text-white">${pStats.missedChecks}</span>
-                    <span class="text-[9px] text-rose-300 uppercase">Mal</span>
+              <div class="grid grid-cols-2 gap-2.5">
+                <button onclick="triggerDbdLiveEvent('missedCheck', '${activePlayerObj.id}')" class="glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex flex-col justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">+1 Shot</span>
+                  <div class="flex items-end justify-between">
+                    <span class="font-bold text-sm text-white leading-tight">Skillcheck verfehlt</span>
+                    <span id="live-count-missed" class="font-display font-bold text-2xl text-white">${pStats.missedChecks}</span>
                   </div>
                 </button>
 
-                <button onclick="triggerDbdLiveEvent('hook', '${activePlayerObj.id}')" ${pStats.hooks >= 3 ? 'disabled' : ''} class="glass-card ${pStats.hooks >= 3 ? 'opacity-60' : 'hover:bg-rose-950/30 active:scale-95'} border border-rose-500/40 rounded-3xl p-4 text-left transition flex items-center justify-between">
-                  <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">
-                      ${pStats.hooks === 2 ? 'Nächster = TOD (+3 Shots)' : pStats.hooks >= 3 ? 'TOT (3/3)' : '+1 Shot'}
-                    </span>
-                    <h3 class="font-bold text-base text-white mt-0.5">Am Haken</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">1. & 2. = 1 Shot | 3. (Tod) = 3 Shots</p>
-                  </div>
-                  <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex flex-col items-center justify-center">
-                    <span class="font-display font-bold text-xl text-white">${pStats.hooks}/3</span>
-                    <span class="text-[9px] text-rose-300 uppercase">Haken</span>
+                <button onclick="triggerDbdLiveEvent('hook', '${activePlayerObj.id}')" class="glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex flex-col justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">${pStats.hooks === 2 ? '3. = +3 Shots' : '+1 Shot'}</span>
+                  <div class="flex items-end justify-between">
+                    <span class="font-bold text-sm text-white leading-tight">Am Haken</span>
+                    <span id="live-count-hooks" class="font-display font-bold text-2xl text-white">${pStats.hooks}/3</span>
                   </div>
                 </button>
 
-                <button onclick="triggerDbdLiveEvent('stunBlind', '${activePlayerObj.id}')" class="glass-card hover:bg-emerald-950/30 border border-emerald-500/40 rounded-3xl p-4 text-left transition active:scale-95 flex items-center justify-between">
-                  <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">+10 Punkte</span>
-                    <h3 class="font-bold text-base text-white mt-0.5">Killer gestunt / geblendet</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Palette, Flashlight, Head On</p>
-                  </div>
-                  <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex flex-col items-center justify-center">
-                    <span class="font-display font-bold text-xl text-white">${pStats.stunsBlinds}</span>
-                    <span class="text-[9px] text-emerald-300 uppercase">Mal</span>
+                <button onclick="triggerDbdLiveEvent('stunBlind', '${activePlayerObj.id}')" class="glass-card hover:bg-emerald-950/30 border border-emerald-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex flex-col justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">+10 Pkt</span>
+                  <div class="flex items-end justify-between">
+                    <span class="font-bold text-sm text-white leading-tight">Stun / Blind</span>
+                    <span id="live-count-stun" class="font-display font-bold text-2xl text-white">${pStats.stunsBlinds}</span>
                   </div>
                 </button>
 
-                <button onclick="triggerDbdLiveEvent('healUnhook', '${activePlayerObj.id}')" class="glass-card hover:bg-emerald-950/30 border border-emerald-500/40 rounded-3xl p-4 text-left transition active:scale-95 flex items-center justify-between">
-                  <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">+10 Punkte</span>
-                    <h3 class="font-bold text-base text-white mt-0.5">Geheilt / Vom Haken gerettet</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Safe Unhook oder Full Heal</p>
-                  </div>
-                  <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex flex-col items-center justify-center">
-                    <span class="font-display font-bold text-xl text-white">${pStats.healsUnhooks}</span>
-                    <span class="text-[9px] text-emerald-300 uppercase">Mal</span>
+                <button onclick="triggerDbdLiveEvent('healUnhook', '${activePlayerObj.id}')" class="glass-card hover:bg-emerald-950/30 border border-emerald-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex flex-col justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">+10 Pkt</span>
+                  <div class="flex items-end justify-between">
+                    <span class="font-bold text-sm text-white leading-tight">Heal / Unhook</span>
+                    <span id="live-count-heal" class="font-display font-bold text-2xl text-white">${pStats.healsUnhooks}</span>
                   </div>
                 </button>
               </div>
             ` : `
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button onclick="triggerDbdLiveEvent('genRepaired')" ${s.gensRepaired >= 5 ? 'disabled' : ''} class="glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-4 text-left transition active:scale-95 flex items-center justify-between">
-                  <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">+1 Shot</span>
-                    <h3 class="font-bold text-base text-white mt-0.5">Gen repariert</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Survivor haben einen Gen fertig</p>
-                  </div>
-                  <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex flex-col items-center justify-center">
-                    <span class="font-display font-bold text-xl text-white">${s.gensRepaired}/5</span>
-                    <span class="text-[9px] text-rose-300 uppercase">Gens</span>
+              <div class="grid grid-cols-2 gap-2.5">
+                <button onclick="triggerDbdLiveEvent('genRepaired')" class="glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex flex-col justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">+1 Shot</span>
+                  <div class="flex items-end justify-between">
+                    <span class="font-bold text-sm text-white">Gen fertig</span>
+                    <span id="killer-count-gens" class="font-display font-bold text-2xl text-white">${s.gensRepaired}/5</span>
                   </div>
                 </button>
 
-                <button onclick="triggerDbdLiveEvent('survHooked')" class="glass-card hover:bg-emerald-950/30 border border-emerald-500/40 rounded-3xl p-4 text-left transition active:scale-95 flex items-center justify-between">
-                  <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">+5 Punkte</span>
-                    <h3 class="font-bold text-base text-white mt-0.5">Survivor angehakt</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Jeder Hook zählt (+5 Pkt)</p>
-                  </div>
-                  <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex flex-col items-center justify-center">
-                    <span class="font-display font-bold text-xl text-white">${s.survivorsHooked}</span>
-                    <span class="text-[9px] text-emerald-300 uppercase">Hooks</span>
+                <button onclick="triggerDbdLiveEvent('survHooked')" class="glass-card hover:bg-emerald-950/30 border border-emerald-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex flex-col justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">+5 Pkt</span>
+                  <div class="flex items-end justify-between">
+                    <span class="font-bold text-sm text-white">Gehakt</span>
+                    <span id="killer-count-hooks" class="font-display font-bold text-2xl text-white">${s.survivorsHooked}</span>
                   </div>
                 </button>
 
-                <button onclick="triggerDbdLiveEvent('survKilled')" ${s.survivorsKilled >= 4 ? 'disabled' : ''} class="glass-card hover:bg-emerald-950/30 border border-emerald-500/40 rounded-3xl p-4 text-left transition active:scale-95 flex items-center justify-between">
-                  <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">+10 Punkte</span>
-                    <h3 class="font-bold text-base text-white mt-0.5">Survivor gekillt</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Opferung / Mori (max. 4)</p>
-                  </div>
-                  <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex flex-col items-center justify-center">
-                    <span class="font-display font-bold text-xl text-white">${s.survivorsKilled}/4</span>
-                    <span class="text-[9px] text-emerald-300 uppercase">Kills</span>
+                <button onclick="triggerDbdLiveEvent('survKilled')" class="glass-card hover:bg-emerald-950/30 border border-emerald-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex flex-col justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">+10 Pkt</span>
+                  <div class="flex items-end justify-between">
+                    <span class="font-bold text-sm text-white">Gekillt</span>
+                    <span id="killer-count-kills" class="font-display font-bold text-2xl text-white">${s.survivorsKilled}/4</span>
                   </div>
                 </button>
 
-                <button onclick="triggerDbdLiveEvent('killerStunned')" class="glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-4 text-left transition active:scale-95 flex items-center justify-between">
-                  <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">+2 Shots jeweils</span>
-                    <h3 class="font-bold text-base text-white mt-0.5">Stun / Blind kassiert</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Palette abbekommen / geblendet</p>
-                  </div>
-                  <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex flex-col items-center justify-center">
-                    <span class="font-display font-bold text-xl text-white">${s.killerStunnedBlinded}</span>
-                    <span class="text-[9px] text-rose-300 uppercase">Mal</span>
+                <button onclick="triggerDbdLiveEvent('killerStunned')" class="glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex flex-col justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">+2 Shots</span>
+                  <div class="flex items-end justify-between">
+                    <span class="font-bold text-sm text-white">Stun / Blind</span>
+                    <span id="killer-count-stun" class="font-display font-bold text-2xl text-white">${s.killerStunnedBlinded}</span>
                   </div>
                 </button>
 
-                <button onclick="triggerDbdLiveEvent('survEscaped')" ${s.survivorsEscaped >= 4 ? 'disabled' : ''} class="sm:col-span-2 glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-4 text-left transition active:scale-95 flex items-center justify-between">
+                <button onclick="triggerDbdLiveEvent('survEscaped')" class="col-span-2 glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex items-center justify-between">
                   <div>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">+1 Shot pro Survivor</span>
-                    <h3 class="font-bold text-base text-white mt-0.5">Entkommene Survivor</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Durch Ausgangstor oder Luke entkommen</p>
+                    <h3 class="font-bold text-sm text-white">Entkommene Survivor</h3>
                   </div>
-                  <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex flex-col items-center justify-center">
-                    <span class="font-display font-bold text-xl text-white">${s.survivorsEscaped}/4</span>
-                    <span class="text-[9px] text-rose-300 uppercase">Raus</span>
-                  </div>
+                  <span id="killer-count-escape" class="font-display font-bold text-2xl text-white">${s.survivorsEscaped}/4</span>
                 </button>
               </div>
             `}
 
             ${state.lobby.role !== 'client' ? `
-              <div class="pt-2">
-                <button onclick="goToDbdReview()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white font-display font-bold text-lg uppercase tracking-wider shadow-xl transition active:scale-95">
-                  Runde vorbei – Zur Übersicht & Auswertung
+              <div class="pt-1">
+                <button onclick="goToDbdReview()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 text-white font-display font-bold text-base uppercase tracking-wider shadow-xl transition active:scale-95">
+                  Runde vorbei – Auswertung
                 </button>
               </div>
             ` : `
-              <p class="text-center text-xs text-zinc-500 pt-2">Der Host beendet die Runde sobald das Match vorbei ist.</p>
+              <p class="text-center text-xs text-zinc-500 pt-1">Der Host beendet die Runde sobald das Match vorbei ist.</p>
             `}
           </div>
         `;
@@ -2764,85 +2344,69 @@
           : getDbdParticipants();
 
         return `
-          <div class="animate-pop space-y-4">
+          <div class="animate-pop space-y-3">
             ${topBar}
 
-            <div class="glass-card rounded-3xl p-5 border border-amber-500/30 space-y-4">
+            <div class="glass-card rounded-3xl p-4 sm:p-5 border border-amber-500/30 space-y-3.5">
               <div>
-                <span class="text-[11px] font-bold uppercase tracking-widest text-amber-400">Runden-Check & Korrektur</span>
-                <h2 class="font-display font-bold text-2xl text-white uppercase">Eigene Stats prüfen & Auflösung eintragen</h2>
-                <p class="text-xs text-zinc-400">Jeder prüft nur seine eigenen Werte und bestätigt am Ende fürs gemeinsame Leaderboard.</p>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-amber-400">Runden-Check</span>
+                <h2 class="font-display font-bold text-2xl text-white uppercase">Eigene Stats & Auflösung</h2>
               </div>
 
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                  Welche Map war es wirklich?
-                </label>
+                <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1">Map</label>
                 <select
                   onchange="state.dbd.actualOutcome.map = this.value"
-                  class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-amber-500"
+                  class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500"
                 >
-                  ${DBD_MAPS.map(m => `
-                    <option value="${m}" ${actual.map === m ? 'selected' : ''}>${m}</option>
-                  `).join('')}
+                  ${DBD_MAPS.map(m => `<option value="${m}" ${actual.map === m ? 'selected' : ''}>${m}</option>`).join('')}
                 </select>
               </div>
 
               ${dbd.mode === 'survivor' ? `
                 <div>
-                  <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                    Welcher Killer war es wirklich?
-                  </label>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1">Killer</label>
                   <select
                     onchange="state.dbd.actualOutcome.killer = this.value"
-                    class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-amber-500"
+                    class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500"
                   >
-                    ${DBD_KILLERS.map(k => `
-                      <option value="${k}" ${actual.killer === k ? 'selected' : ''}>${k}</option>
-                    `).join('')}
+                    ${DBD_KILLERS.map(k => `<option value="${k}" ${actual.killer === k ? 'selected' : ''}>${k}</option>`).join('')}
                   </select>
                 </div>
 
-                <div class="space-y-3 pt-1">
+                <div class="space-y-2.5">
                   ${reviewParticipants.map(p => {
                     const pStats = ensureDbdPlayerStats(p.id);
                     return `
-                      <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3.5 space-y-2.5">
-                        <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
-                          <span class="font-bold text-sm text-cyan-300">${p.name}</span>
-                          <span class="text-[11px] text-zinc-400">Eigene Runden-Stats</span>
-                        </div>
-
+                      <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3 space-y-2">
+                        <div class="font-bold text-sm text-cyan-300 border-b border-zinc-800 pb-1.5">${p.name}</div>
                         <div class="flex items-center justify-between text-xs">
                           <span class="text-zinc-300">Skillchecks verfehlt</span>
-                          <div class="flex items-center gap-2.5">
+                          <div class="flex items-center gap-2">
                             <button onclick="adjustReviewPlayerStat('${p.id}', 'missedChecks', -1, 0, 50)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">-</button>
                             <span class="font-bold w-6 text-center text-white">${pStats.missedChecks}</span>
                             <button onclick="adjustReviewPlayerStat('${p.id}', 'missedChecks', 1, 0, 50)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">+</button>
                           </div>
                         </div>
-
                         <div class="flex items-center justify-between text-xs">
                           <span class="text-zinc-300">Male am Haken (0–3)</span>
-                          <div class="flex items-center gap-2.5">
+                          <div class="flex items-center gap-2">
                             <button onclick="adjustReviewPlayerStat('${p.id}', 'hooks', -1, 0, 3)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">-</button>
                             <span class="font-bold w-6 text-center text-white">${pStats.hooks}</span>
                             <button onclick="adjustReviewPlayerStat('${p.id}', 'hooks', 1, 0, 3)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">+</button>
                           </div>
                         </div>
-
                         <div class="flex items-center justify-between text-xs">
-                          <span class="text-zinc-300">Killer gestunt / geblendet</span>
-                          <div class="flex items-center gap-2.5">
+                          <span class="text-zinc-300">Stun / Blind</span>
+                          <div class="flex items-center gap-2">
                             <button onclick="adjustReviewPlayerStat('${p.id}', 'stunsBlinds', -1, 0, 50)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">-</button>
                             <span class="font-bold w-6 text-center text-white">${pStats.stunsBlinds}</span>
                             <button onclick="adjustReviewPlayerStat('${p.id}', 'stunsBlinds', 1, 0, 50)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">+</button>
                           </div>
                         </div>
-
                         <div class="flex items-center justify-between text-xs">
-                          <span class="text-zinc-300">Geheilt / Vom Haken gerettet</span>
-                          <div class="flex items-center gap-2.5">
+                          <span class="text-zinc-300">Heal / Unhook</span>
+                          <div class="flex items-center gap-2">
                             <button onclick="adjustReviewPlayerStat('${p.id}', 'healsUnhooks', -1, 0, 50)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">-</button>
                             <span class="font-bold w-6 text-center text-white">${pStats.healsUnhooks}</span>
                             <button onclick="adjustReviewPlayerStat('${p.id}', 'healsUnhooks', 1, 0, 50)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">+</button>
@@ -2854,58 +2418,54 @@
                 </div>
               ` : `
                 <div>
-                  <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                    Welcher Exhaustion Perk war drin?
-                  </label>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1">Exhaustion Perk</label>
                   <select
                     onchange="state.dbd.actualOutcome.exhaustionPerk = this.value"
-                    class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-amber-500"
+                    class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500"
                   >
-                    ${DBD_EXHAUSTION_PERKS.map(perk => `
-                      <option value="${perk.id}" ${actual.exhaustionPerk === perk.id ? 'selected' : ''}>${perk.name}</option>
-                    `).join('')}
+                    ${DBD_EXHAUSTION_PERKS.map(perk => `<option value="${perk.id}" ${actual.exhaustionPerk === perk.id ? 'selected' : ''}>${perk.name}</option>`).join('')}
                   </select>
                 </div>
 
-                <div class="space-y-2.5 pt-2">
-                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2.5 rounded-2xl">
-                    <span class="text-xs font-semibold text-zinc-200">Gens repariert (0–5)</span>
-                    <div class="flex items-center gap-3">
-                      <button onclick="adjustReviewGlobalStat('gensRepaired', -1, 0, 5)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">-</button>
-                      <span class="font-display font-bold text-lg w-8 text-center">${s.gensRepaired}</span>
-                      <button onclick="adjustReviewGlobalStat('gensRepaired', 1, 0, 5)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">+</button>
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2 rounded-2xl text-xs">
+                    <span>Gens repariert (0–5)</span>
+                    <div class="flex items-center gap-2.5">
+                      <button onclick="adjustReviewGlobalStat('gensRepaired', -1, 0, 5)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">-</button>
+                      <span class="font-bold w-6 text-center">${s.gensRepaired}</span>
+                      <button onclick="adjustReviewGlobalStat('gensRepaired', 1, 0, 5)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">+</button>
                     </div>
                   </div>
-                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2.5 rounded-2xl">
-                    <span class="text-xs font-semibold text-zinc-200">Survivor angehakt</span>
-                    <div class="flex items-center gap-3">
-                      <button onclick="adjustReviewGlobalStat('survivorsHooked', -1, 0, 12)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">-</button>
-                      <span class="font-display font-bold text-lg w-8 text-center">${s.survivorsHooked}</span>
-                      <button onclick="adjustReviewGlobalStat('survivorsHooked', 1, 0, 12)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">+</button>
+                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2 rounded-2xl text-xs">
+                    <span>Survivor angehakt</span>
+                    <div class="flex items-center gap-2.5">
+                      <button onclick="adjustReviewGlobalStat('survivorsHooked', -1, 0, 12)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">-</button>
+                      <span class="font-bold w-6 text-center">${s.survivorsHooked}</span>
+                      <button onclick="adjustReviewGlobalStat('survivorsHooked', 1, 0, 12)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">+</button>
                     </div>
                   </div>
-                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2.5 rounded-2xl">
-                    <span class="text-xs font-semibold text-zinc-200">Survivor gekillt (0–4)</span>
-                    <div class="flex items-center gap-3">
-                      <button onclick="adjustReviewGlobalStat('survivorsKilled', -1, 0, 4)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">-</button>
-                      <span class="font-display font-bold text-lg w-8 text-center">${s.survivorsKilled}</span>
-                      <button onclick="adjustReviewGlobalStat('survivorsKilled', 1, 0, 4)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">+</button>
+                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2 rounded-2xl text-xs">
+                    <span>Survivor gekillt (0–4)</span>
+                    <div class="flex items-center gap-2.5">
+                      <button onclick="adjustReviewGlobalStat('survivorsKilled', -1, 0, 4)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">-</button>
+                      <span class="font-bold w-6 text-center">${s.survivorsKilled}</span>
+                      <button onclick="adjustReviewGlobalStat('survivorsKilled', 1, 0, 4)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">+</button>
                     </div>
                   </div>
-                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2.5 rounded-2xl">
-                    <span class="text-xs font-semibold text-zinc-200">Stun / Blind kassiert</span>
-                    <div class="flex items-center gap-3">
-                      <button onclick="adjustReviewGlobalStat('killerStunnedBlinded', -1, 0, 50)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">-</button>
-                      <span class="font-display font-bold text-lg w-8 text-center">${s.killerStunnedBlinded}</span>
-                      <button onclick="adjustReviewGlobalStat('killerStunnedBlinded', 1, 0, 50)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">+</button>
+                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2 rounded-2xl text-xs">
+                    <span>Stun / Blind kassiert</span>
+                    <div class="flex items-center gap-2.5">
+                      <button onclick="adjustReviewGlobalStat('killerStunnedBlinded', -1, 0, 50)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">-</button>
+                      <span class="font-bold w-6 text-center">${s.killerStunnedBlinded}</span>
+                      <button onclick="adjustReviewGlobalStat('killerStunnedBlinded', 1, 0, 50)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">+</button>
                     </div>
                   </div>
-                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2.5 rounded-2xl">
-                    <span class="text-xs font-semibold text-zinc-200">Entkommene Survivor (0–4)</span>
-                    <div class="flex items-center gap-3">
-                      <button onclick="adjustReviewGlobalStat('survivorsEscaped', -1, 0, 4)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">-</button>
-                      <span class="font-display font-bold text-lg w-8 text-center">${s.survivorsEscaped}</span>
-                      <button onclick="adjustReviewGlobalStat('survivorsEscaped', 1, 0, 4)" class="w-8 h-8 rounded-xl bg-zinc-800 font-bold">+</button>
+                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 px-3.5 py-2 rounded-2xl text-xs">
+                    <span>Entkommene Survivor (0–4)</span>
+                    <div class="flex items-center gap-2.5">
+                      <button onclick="adjustReviewGlobalStat('survivorsEscaped', -1, 0, 4)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">-</button>
+                      <span class="font-bold w-6 text-center">${s.survivorsEscaped}</span>
+                      <button onclick="adjustReviewGlobalStat('survivorsEscaped', 1, 0, 4)" class="w-7 h-7 rounded-lg bg-zinc-800 font-bold">+</button>
                     </div>
                   </div>
                 </div>
@@ -2916,8 +2476,8 @@
                   <p class="text-xs text-emerald-300 font-bold">Ergebnis bestätigt! Leaderboard erscheint sobald alle fertig sind...</p>
                 </div>
               ` : `
-                <button onclick="confirmDbdReviewForPlayer('${myReviewId}')" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 text-white font-display font-bold text-lg uppercase tracking-wider shadow-xl transition active:scale-95">
-                  Ergebnis bestätigen & Leaderboard öffnen
+                <button onclick="confirmDbdReviewForPlayer('${myReviewId}')" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-display font-bold text-base uppercase tracking-wider shadow-xl transition active:scale-95">
+                  Ergebnis bestätigen
                 </button>
               `}
             </div>
@@ -2928,20 +2488,18 @@
       if (dbd.phase === 'leaderboard') {
         const results = dbd.results || [];
         const maxShots = results.reduce((max, r) => Math.max(max, r.shots), 0);
+        const newRoundLabel = dbd.mode === 'killer' ? 'Neue Runde (Killer wechselt)' : 'Neue Runde';
 
         return `
-          <div class="animate-pop space-y-4">
+          <div class="animate-pop space-y-3.5">
             ${topBar}
 
-            <div class="glass-card rounded-3xl p-5 border border-amber-500/30 text-center">
+            <div class="glass-card rounded-3xl p-4 sm:p-5 border border-amber-500/30 text-center">
               <span class="text-[11px] font-bold uppercase tracking-widest text-amber-400">Runden-Auswertung</span>
               <h2 class="font-display font-bold text-3xl text-white uppercase mt-0.5">Leaderboard</h2>
-              <p class="text-xs text-zinc-400 mt-1">
-                Sortiert nach verdienten Punkten • Shots wurden dem Squad-Pegel gutgeschrieben!
-              </p>
             </div>
 
-            <div class="space-y-3.5 pt-1">
+            <div class="space-y-3 pt-1">
               ${results.map((res, idx) => {
                 const isTopDrinker = maxShots > 0 && res.shots === maxShots;
                 const rankColor = idx === 0 ? 'from-amber-500 to-yellow-600 text-black' : idx === 1 ? 'from-zinc-300 to-zinc-500 text-black' : 'from-zinc-800 to-zinc-900 text-zinc-300';
@@ -2949,7 +2507,7 @@
                 return `
                   <div class="relative glass-card rounded-3xl p-4 border ${idx === 0 ? 'border-amber-500/50' : 'border-zinc-800'}">
                     ${isTopDrinker ? `
-                      <div class="sticker-badge absolute -top-3 -right-2 z-20 bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 text-zinc-950 font-display font-extrabold text-[11px] uppercase tracking-wider px-3 py-1 rounded-full shadow-lg border-2 border-zinc-950 flex items-center gap-1">
+                      <div class="sticker-badge absolute -top-3 -right-2 z-20 bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 text-zinc-950 font-display font-extrabold text-[11px] uppercase tracking-wider px-3 py-1 rounded-full shadow-lg border-2 border-zinc-950">
                         <span>Meiste Shots (${res.shots})</span>
                       </div>
                     ` : ''}
@@ -2969,7 +2527,7 @@
                       </div>
                     </div>
 
-                    <div class="mt-3 pt-2.5 border-t border-zinc-800/80 space-y-1">
+                    <div class="mt-2.5 pt-2 border-t border-zinc-800/80 space-y-1">
                       ${res.breakdown.map(line => `
                         <p class="text-[11px] text-zinc-400 leading-snug">• ${line}</p>
                       `).join('')}
@@ -2979,12 +2537,12 @@
               }).join('')}
             </div>
 
-            <div class="grid grid-cols-2 gap-3 pt-2">
-              <button onclick="resetDbdMatch('role', true)" class="py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg transition active:scale-95">
-                Neue Runde (Killer rotiert)
+            <div class="grid grid-cols-2 gap-2.5 pt-1">
+              <button onclick="startSameModeNewRound(false)" class="py-3.5 px-2 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs uppercase tracking-wider shadow-lg transition active:scale-95">
+                ${newRoundLabel}
               </button>
-              <button onclick="goHome()" class="py-3.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-xs uppercase tracking-wider transition active:scale-95">
-                Hauptmenü
+              <button onclick="resetDbdMatch('role', false)" class="py-3.5 px-2 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-xs uppercase tracking-wider transition active:scale-95">
+                Rolle wechseln
               </button>
             </div>
           </div>
@@ -2992,174 +2550,6 @@
       }
 
       return '';
-    }
-
-    // =========================================================================
-    // 10. STANDARD GAME VIEW (ALLE ANDEREN GAMES)
-    // =========================================================================
-    function renderGameView() {
-      const game = getActiveGame();
-      if (!game) return renderHubView();
-
-      const backAction = state.selectedFranchiseId
-        ? `openGameOrFranchise('${state.selectedFranchiseId}')`
-        : `goHome()`;
-
-      const intensities = [
-        { id: 'chill', label: 'Chill', color: 'text-cyan-400 border-cyan-500/40 bg-cyan-500/10' },
-        { id: 'normal', label: 'Normal', color: 'text-purple-400 border-purple-500/40 bg-purple-500/10' },
-        { id: 'hardcore', label: 'Hardcore', color: 'text-rose-400 border-rose-500/40 bg-rose-500/10' }
-      ];
-
-      return `
-        <div class="space-y-4 animate-pop">
-          <div class="flex items-center justify-between gap-2">
-            <button onclick="${backAction}" class="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 px-3.5 py-2 rounded-xl transition active:scale-95">
-              <i data-lucide="arrow-left" class="w-4 h-4"></i>
-              <span>Zurück</span>
-            </button>
-
-            <div class="flex items-center gap-1 bg-zinc-900/90 border border-zinc-800 p-1 rounded-xl">
-              ${intensities.map(lvl => {
-                const active = state.intensity === lvl.id;
-                return `
-                  <button
-                    onclick="setIntensity('${lvl.id}')"
-                    class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
-                      active ? lvl.color + ' border' : 'text-zinc-500 hover:text-zinc-300'
-                    }">
-                    ${lvl.label}
-                  </button>
-                `;
-              }).join('')}
-            </div>
-          </div>
-
-          <div class="glass-card rounded-3xl p-5 border border-zinc-800 relative overflow-hidden">
-            <div class="absolute -right-8 -top-8 w-32 h-32 bg-purple-600/20 rounded-full blur-2xl"></div>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400">${game.tag || game.badge || 'Active Session'}</span>
-            <h2 class="font-display font-bold text-2xl sm:text-3xl text-white uppercase tracking-wide mt-0.5">
-              ${game.title}
-            </h2>
-          </div>
-
-          ${state.pendingDrink ? `
-            <div class="glass-card rounded-3xl p-4 border-2 border-amber-500/60 bg-amber-950/20 animate-pop space-y-3">
-              <div class="flex items-start justify-between gap-2">
-                <div>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                    +${state.pendingDrink.sips} ${state.pendingDrink.sips === 1 ? 'Schluck' : 'Schlucke'} verbuchen für:
-                  </span>
-                  <p class="text-xs text-zinc-200 font-medium mt-0.5">„${state.pendingDrink.text}“</p>
-                </div>
-                <button onclick="dismissPendingDrink()" class="text-zinc-400 hover:text-white p-1">
-                  <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                ${state.players.map(p => `
-                  <button
-                    onclick="assignPendingDrink('${p.id}')"
-                    class="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-amber-500/20 border border-zinc-700 hover:border-amber-500/50 text-xs font-semibold text-white transition active:scale-95">
-                    ${p.name}
-                  </button>
-                `).join('')}
-                <button
-                  onclick="assignPendingDrink('ALL')"
-                  class="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-xs font-bold text-white shadow-lg transition active:scale-95">
-                  Alle zusammen!
-                </button>
-              </div>
-            </div>
-          ` : ''}
-
-          <div class="grid grid-cols-2 gap-2 bg-zinc-900/90 p-1.5 rounded-2xl border border-zinc-800">
-            <button
-              onclick="setActiveTab('rules')"
-              class="py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition ${
-                state.activeTab === 'rules'
-                  ? 'bg-zinc-800 text-white shadow'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }">
-              <i data-lucide="list-checks" class="w-4 h-4 text-purple-400"></i>
-              <span>Live-Regeln</span>
-            </button>
-            <button
-              onclick="setActiveTab('cards')"
-              class="py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition ${
-                state.activeTab === 'cards'
-                  ? 'bg-zinc-800 text-white shadow'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }">
-              <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
-              <span>Karten-Deck</span>
-            </button>
-          </div>
-
-          ${state.activeTab === 'rules' ? `
-            <div class="space-y-2.5">
-              ${(game.rules || []).map(rule => {
-                const scaled = getScaledSips(rule.sips);
-                let badgeStyle = 'bg-purple-500/20 text-purple-300 border-purple-500/30';
-                let label = `${scaled} ${scaled === 1 ? 'Schluck' : 'Schlucke'}`;
-
-                if (rule.type === 'reward') {
-                  badgeStyle = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-                  label = `Verteile ${scaled}`;
-                } else if (rule.type === 'extreme') {
-                  badgeStyle = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
-                  label = `${scaled} Schlucke!`;
-                }
-
-                return `
-                  <div
-                    onclick="triggerRule(${rule.sips}, '${rule.event.replace(/'/g, "\\'")}')"
-                    class="glass-card hover:bg-zinc-900/90 border border-zinc-800/90 hover:border-zinc-700 rounded-2xl p-4 flex items-center justify-between gap-3 cursor-pointer transition active:scale-[0.98]"
-                  >
-                    <p class="text-sm text-zinc-100 font-medium leading-snug flex-1">
-                      ${rule.event}
-                    </p>
-                    <span class="px-3 py-1.5 rounded-xl border text-xs font-bold whitespace-nowrap shrink-0 ${badgeStyle}">
-                      ${label}
-                    </span>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          ` : `
-            <div class="space-y-4">
-              <div class="glass-card rounded-3xl p-6 border border-cyan-500/30 min-h-[210px] flex flex-col items-center justify-center text-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-cyan-600/10"></div>
-                ${state.currentCard ? `
-                  <div class="relative z-10 animate-pop space-y-3">
-                    <span class="inline-block px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[10px] font-bold uppercase tracking-widest">
-                      ${game.title} Karte
-                    </span>
-                    <p class="text-lg sm:text-xl font-bold text-white leading-relaxed">
-                      ${state.currentCard}
-                    </p>
-                  </div>
-                ` : `
-                  <div class="relative z-10 space-y-2">
-                    <i data-lucide="sparkles" class="w-9 h-9 text-cyan-400 mx-auto opacity-80"></i>
-                    <p class="text-sm text-zinc-400">
-                      Zieht reihum eine Karte für spontane Challenges & Regeln!
-                    </p>
-                  </div>
-                `}
-              </div>
-
-              <button
-                onclick="drawRandomCard()"
-                class="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 hover:opacity-95 text-white font-display font-bold text-lg uppercase tracking-wider shadow-xl shadow-purple-900/30 transition active:scale-95 flex items-center justify-center gap-2"
-              >
-                <i data-lucide="shuffle" class="w-5 h-5"></i>
-                <span>${state.currentCard ? 'Nächste Karte ziehen' : 'Erste Karte ziehen'}</span>
-              </button>
-            </div>
-          `}
-        </div>
-      `;
     }
 
     // Initial Render

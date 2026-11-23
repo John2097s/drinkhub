@@ -695,6 +695,319 @@
     }
 
     // =========================================================================
+    // 4. P2P MULTIPLAYER LOBBY (PEERJS)
+    // =========================================================================
+    function generateLobbyCode() {
+      return String(Math.floor(1000 + Math.random() * 9000));
+    }
+
+    function getPeerIdForLobbyCode(code) {
+      return `gndh-lobby-${code}`;
+    }
+
+    function getOrCreateLocalPlayerId() {
+      if (state.lobby.myPlayerId) return state.lobby.myPlayerId;
+      if (state.players.length > 0 && state.players[0].id) {
+        state.lobby.myPlayerId = state.players[0].id;
+        return state.lobby.myPlayerId;
+      }
+      const id = 'p-' + Date.now();
+      state.lobby.myPlayerId = id;
+      return id;
+    }
+
+    function hostLobby() {
+      try {
+        if (typeof Peer === 'undefined') {
+          showToast('PeerJS ist nicht geladen. Bitte Verbindung prüfen.');
+          return;
+        }
+        const nameInput = document.getElementById('lobby-player-name');
+        const myName = (nameInput && nameInput.value.trim()) || state.lobby.myName || state.players[0]?.name || 'Host';
+        const myId = getOrCreateLocalPlayerId();
+
+        state.lobby.myName = myName;
+        state.lobby.myPlayerId = myId;
+
+        if (!state.players.some(p => p.id === myId)) {
+          state.players.unshift({ id: myId, name: myName, sips: 0 });
+        } else {
+          const existing = state.players.find(p => p.id === myId);
+          if (existing) existing.name = myName;
+        }
+        savePlayers();
+
+        disconnectLobby(true);
+
+        const code = generateLobbyCode();
+        const peer = new Peer(getPeerIdForLobbyCode(code), { debug: 0 });
+
+        state.lobby.role = 'host';
+        state.lobby.code = code;
+        state.lobby.peer = peer;
+        state.lobby.conns = [];
+        state.lobby.hostConn = null;
+        updateLobbyBadge();
+        renderLobbyModal();
+
+        peer.on('open', () => {
+          triggerRumble('medium', false);
+          showToast(`Lobby #${code} ist bereit!`);
+          renderLobbyModal();
+        });
+
+        peer.on('connection', (conn) => {
+          if (state.players.length >= 4) {
+            conn.on('open', () => {
+              conn.send({ type: 'LOBBY_FULL' });
+              setTimeout(() => conn.close(), 250);
+            });
+            return;
+          }
+
+          state.lobby.conns.push(conn);
+
+          conn.on('data', (data) => {
+            handleHostReceivedData(conn, data);
+          });
+
+          conn.on('close', () => {
+            state.lobby.conns = state.lobby.conns.filter(c => c !== conn);
+            if (conn._clientPlayerId) {
+              state.players = state.players.filter(p => p.id !== conn._clientPlayerId);
+              savePlayers();
+              broadcastState();
+              render();
+              renderLobbyModal();
+            }
+          });
+
+          conn.on('error', () => {
+            state.lobby.conns = state.lobby.conns.filter(c => c !== conn);
+          });
+        });
+
+        peer.on('error', (err) => {
+          console.warn('Host Peer Fehler:', err);
+          if (err && err.type === 'unavailable-id') {
+            hostLobby();
+            return;
+          }
+          showToast('Lobby konnte nicht erstellt werden.');
+        });
+      } catch (e) {
+        console.warn('hostLobby Fehler:', e);
+        showToast('Fehler beim Starten der Lobby.');
+      }
+    }
+
+    function joinLobby() {
+      try {
+        if (typeof Peer === 'undefined') {
+          showToast('PeerJS ist nicht geladen. Bitte Verbindung prüfen.');
+          return;
+        }
+        const nameInput = document.getElementById('lobby-player-name');
+        const codeInput = document.getElementById('join-lobby-code');
+        const myName = (nameInput && nameInput.value.trim()) || state.lobby.myName || state.players[0]?.name || 'Spieler';
+        const rawCode = (codeInput && codeInput.value.trim()) || '';
+
+        if (!/^\d{4}$/.test(rawCode)) {
+          showToast('Bitte einen 4-stelligen Lobby-Code eingeben!');
+          return;
+        }
+
+        const myId = getOrCreateLocalPlayerId();
+        state.lobby.myName = myName;
+        state.lobby.myPlayerId = myId;
+
+        disconnectLobby(true);
+
+        const peer = new Peer(undefined, { debug: 0 });
+        state.lobby.role = 'client';
+        state.lobby.code = rawCode;
+        state.lobby.peer = peer;
+        state.lobby.conns = [];
+        state.lobby.hostConn = null;
+        updateLobbyBadge();
+        showToast(`Verbinde mit Lobby #${rawCode}...`);
+
+        peer.on('open', () => {
+          const conn = peer.connect(getPeerIdForLobbyCode(rawCode), { reliable: true });
+          state.lobby.hostConn = conn;
+
+          conn.on('open', () => {
+            conn.send({
+              type: 'JOIN_REQUEST',
+              player: { id: myId, name: myName, sips: 0 }
+            });
+            triggerRumble('light', false);
+            renderLobbyModal();
+          });
+
+          conn.on('data', (data) => {
+            handleClientReceivedData(data);
+          });
+
+          conn.on('close', () => {
+            showToast('Verbindung zur Lobby getrennt.');
+            disconnectLobby(true);
+            render();
+          });
+
+          conn.on('error', () => {
+            showToast('Verbindung zum Host fehlgeschlagen.');
+          });
+        });
+
+        peer.on('error', (err) => {
+          console.warn('Client Peer Fehler:', err);
+          showToast('Lobby nicht gefunden oder Verbindung fehlgeschlagen.');
+        });
+      } catch (e) {
+        console.warn('joinLobby Fehler:', e);
+        showToast('Fehler beim Beitreten.');
+      }
+    }
+
+    function disconnectLobby(silent = false) {
+      try {
+        if (state.lobby.hostConn) {
+          state.lobby.hostConn.close();
+          state.lobby.hostConn = null;
+        }
+        if (Array.isArray(state.lobby.conns)) {
+          state.lobby.conns.forEach(c => {
+            try { c.close(); } catch (err) {}
+          });
+          state.lobby.conns = [];
+        }
+        if (state.lobby.peer) {
+          state.lobby.peer.destroy();
+          state.lobby.peer = null;
+        }
+      } catch (e) {}
+
+      state.lobby.role = 'offline';
+      state.lobby.code = '';
+      updateLobbyBadge();
+      if (!silent) {
+        showToast('Lobby verlassen.');
+        renderLobbyModal();
+        render();
+      }
+    }
+
+    function handleHostReceivedData(conn, data) {
+      if (!data || typeof data !== 'object') return;
+
+      if (data.type === 'JOIN_REQUEST' && data.player) {
+        if (state.players.length >= 4) {
+          conn.send({ type: 'LOBBY_FULL' });
+          return;
+        }
+        const incomingId = data.player.id || ('p-' + Date.now());
+        const incomingName = String(data.player.name || 'Spieler').trim().slice(0, 18) || 'Spieler';
+        conn._clientPlayerId = incomingId;
+
+        const existing = state.players.find(p => p.id === incomingId);
+        if (existing) {
+          existing.name = incomingName;
+        } else {
+          state.players.push({ id: incomingId, name: incomingName, sips: Number(data.player.sips) || 0 });
+        }
+        ensureDbdPlayerStats(incomingId);
+        savePlayers();
+        broadcastState();
+        render();
+        renderLobbyModal();
+        showToast(`${incomingName} ist beigetreten!`);
+      } else if (data.type === 'DBD_PREDICTION') {
+        if (!data.playerId || !data.targetId || !data.prediction) return;
+        if (!state.dbd.predictions[data.playerId]) state.dbd.predictions[data.playerId] = {};
+        state.dbd.predictions[data.playerId][data.targetId] = data.prediction;
+        broadcastState();
+      } else if (data.type === 'DBD_READY') {
+        if (!data.playerId) return;
+        state.dbd.readyPlayers[data.playerId] = Boolean(data.ready);
+        if (areAllDbdPlayersReady() && state.dbd.phase === 'predict') {
+          startDbdLiveRound();
+        } else {
+          broadcastState();
+          render();
+        }
+      } else if (data.type === 'DBD_LIVE_ACTION') {
+        applyDbdLiveAction(data.action, data.targetPlayerId, true);
+      } else if (data.type === 'DBD_REVIEW_READY') {
+        if (!data.playerId) return;
+        state.dbd.reviewReadyPlayers[data.playerId] = true;
+        if (areAllDbdPlayersReviewReady() && state.dbd.phase === 'review') {
+          evaluateDbdMatch();
+        } else {
+          broadcastState();
+          render();
+        }
+      } else if (data.type === 'DBD_NEW_ROUND') {
+        startSameModeNewRound(true);
+      }
+    }
+
+    function handleClientReceivedData(data) {
+      if (!data || typeof data !== 'object') return;
+
+      if (data.type === 'LOBBY_FULL') {
+        showToast('Lobby ist bereits voll (max. 4 Spieler).');
+        disconnectLobby(true);
+        renderLobbyModal();
+        return;
+      }
+
+      if (data.type === 'STATE_SYNC' && data.payload) {
+        const p = data.payload;
+        if (Array.isArray(p.players)) state.players = p.players;
+        if (p.view) state.view = p.view;
+        if (p.selectedGameId !== undefined) state.selectedGameId = p.selectedGameId;
+        if (p.dbd) state.dbd = p.dbd;
+        updatePlayerBadge();
+        updateLobbyBadge();
+        render();
+        const lobbyModal = document.getElementById('lobby-modal');
+        if (lobbyModal && !lobbyModal.classList.contains('hidden')) {
+          renderLobbyModal();
+        }
+      }
+    }
+
+    function broadcastState() {
+      if (state.lobby.role !== 'host' || !Array.isArray(state.lobby.conns)) return;
+      const payload = {
+        players: state.players,
+        view: state.view,
+        selectedGameId: state.selectedGameId,
+        dbd: state.dbd
+      };
+      state.lobby.conns.forEach(conn => {
+        try {
+          if (conn && conn.open) {
+            conn.send({ type: 'STATE_SYNC', payload });
+          }
+        } catch (e) {}
+      });
+    }
+
+    function areAllDbdPlayersReady() {
+      const participants = getDbdParticipants();
+      if (participants.length === 0) return false;
+      return participants.every(p => Boolean(state.dbd.readyPlayers[p.id]));
+    }
+
+    function areAllDbdPlayersReviewReady() {
+      const participants = getDbdParticipants();
+      if (participants.length === 0) return false;
+      return participants.every(p => Boolean(state.dbd.reviewReadyPlayers[p.id]));
+    }
+
+    // =========================================================================
     // 5. NAVIGATION, PROFIL-ARCHIV & SQUAD-VERWALTUNG
     // =========================================================================
     let selectedArchiveEntryId = null;

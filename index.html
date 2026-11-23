@@ -460,392 +460,172 @@
       }
     }
 
-    function updatePlayerBadge() {
-      const badge = document.getElementById('player-count-badge');
-      if (badge) {
-        badge.textContent = `${state.players.length}`;
+    function toggleLobbyModal(show) {
+      const modal = document.getElementById('lobby-modal');
+      if (!modal) return;
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        renderLobbyModal();
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
       }
     }
 
-    /**
-     * Einheitliche Vibration: immer EIN durchgehendes Puls-Muster ("1 Brr"),
-     * unterschieden ausschließlich über die Dauer/Stärke ('light' | 'medium' | 'heavy').
-     */
-    function triggerRumble(strength = 'medium', sendRemote = true) {
-      const durationMap = {
-        light: 45,
-        medium: 140,
-        heavy: 320
-      };
-      const ms = durationMap[strength] || durationMap.medium;
-
+    function copyLobbyCode(code) {
+      if (!code) return;
       try {
-        if (typeof navigator !== 'undefined') {
-          const vibFn = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate;
-          if (typeof vibFn === 'function') {
-            vibFn.call(navigator, ms);
-          }
-        }
-      } catch (e) {}
-
-      if (sendRemote) {
-        if (state.lobby.role === 'host' && Array.isArray(state.lobby.conns)) {
-          state.lobby.conns.forEach(conn => {
-            if (conn && conn.open) {
-              conn.send({ type: 'RUMBLE', strength });
-            }
-          });
-        } else if (state.lobby.role === 'client' && state.lobby.hostConn && state.lobby.hostConn.open) {
-          state.lobby.hostConn.send({ type: 'RUMBLE_REQUEST', strength });
-        }
+        const tmp = document.createElement('textarea');
+        tmp.value = String(code);
+        tmp.setAttribute('readonly', '');
+        tmp.style.position = 'fixed';
+        tmp.style.opacity = '0';
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand('copy');
+        document.body.removeChild(tmp);
+        triggerRumble('light', false);
+        showToast(`Lobby-Code #${code} kopiert!`);
+      } catch (e) {
+        showToast(`Lobby-Code: #${code}`);
       }
     }
 
-    function triggerVictoryConfetti() {
-      triggerRumble('heavy', true);
-      try {
-        if (typeof confetti === 'function') {
-          confetti({
-            particleCount: 75,
-            spread: 68,
-            origin: { y: 0.65 },
-            colors: ['#a855f7', '#06b6d4', '#ec4899', '#f59e0b', '#10b981']
-          });
-        }
-      } catch (e) {}
-    }
+    function renderLobbyModal() {
+      const body = document.getElementById('lobby-modal-body');
+      if (!body) return;
 
-    function updateLobbyBadge() {
-      const dot = document.getElementById('lobby-status-dot');
-      const txt = document.getElementById('lobby-btn-text');
-      if (!dot || !txt) return;
+      const myName = state.lobby.myName || state.players[0]?.name || 'Spieler';
 
       if (state.lobby.role === 'host') {
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0';
-        txt.textContent = `${state.lobby.code} (${state.players.length}/4)`;
-      } else if (state.lobby.role === 'client') {
-        dot.className = 'w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0';
-        txt.textContent = `#${state.lobby.code}`;
-      } else {
-        dot.className = 'w-2 h-2 rounded-full bg-zinc-500 shrink-0';
-        txt.textContent = 'Lobby';
-      }
-    }
+        body.innerHTML = `
+          <div class="bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Host aktiv</span>
+              <span class="text-xs font-semibold text-zinc-300">${state.players.length}/4 Spieler</span>
+            </div>
 
-    // =========================================================================
-    // 4. P2P MULTIPLAYER (PEERJS MIT STUN-SERVERN & ROBUSTEM HANDSHAKE)
-    // =========================================================================
-    const PEER_CONFIG = {
-      debug: 1,
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' },
-          { urls: 'stun:global.stun.twilio.com:3478' }
-        ]
-      }
-    };
+            <div class="flex items-center justify-between bg-zinc-950/90 border border-zinc-800 rounded-2xl px-4 py-3">
+              <div>
+                <span class="block text-[10px] uppercase tracking-wider text-zinc-400">Lobby-Code</span>
+                <span class="font-display font-bold text-3xl tracking-widest text-white">#${state.lobby.code}</span>
+              </div>
+              <button
+                onclick="copyLobbyCode('${state.lobby.code}')"
+                class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition active:scale-95 flex items-center gap-1.5"
+              >
+                <i data-lucide="copy" class="w-4 h-4 text-cyan-400"></i>
+                <span>Kopieren</span>
+              </button>
+            </div>
 
-    function generateLobbyCode() {
-      return String(Math.floor(1000 + Math.random() * 9000));
-    }
+            <div class="space-y-1.5">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Verbundenes Squad</p>
+              ${state.players.map((p, idx) => `
+                <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 rounded-xl px-3 py-2 text-xs">
+                  <span class="font-semibold text-white">${p.name}</span>
+                  <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${idx === 0 ? 'bg-purple-500/20 text-purple-300' : 'bg-cyan-500/20 text-cyan-300'}">
+                    ${idx === 0 ? 'Host' : 'Client'}
+                  </span>
+                </div>
+              `).join('')}
+            </div>
 
-    function disconnectLobby(silent = false) {
-      try {
-        if (Array.isArray(state.lobby.conns)) {
-          state.lobby.conns.forEach(conn => {
-            try {
-              if (conn && typeof conn.close === 'function') conn.close();
-            } catch (e) {}
-          });
-        }
-        if (state.lobby.hostConn && typeof state.lobby.hostConn.close === 'function') {
-          try {
-            state.lobby.hostConn.close();
-          } catch (e) {}
-        }
-        if (state.lobby.peer && typeof state.lobby.peer.destroy === 'function') {
-          try {
-            state.lobby.peer.destroy();
-          } catch (e) {}
-        }
-      } catch (err) {
-        console.error('Fehler beim Trennen der Lobby:', err);
-      }
-
-      state.lobby.role = 'offline';
-      state.lobby.code = '';
-      state.lobby.peer = null;
-      state.lobby.conns = [];
-      state.lobby.hostConn = null;
-
-      updateLobbyBadge();
-      if (!silent) {
-        showToast('Lobby geschlossen / verlassen.');
-      }
-      renderLobbyModal();
-      render();
-    }
-
-    function hostLobby() {
-      if (typeof Peer === 'undefined') {
-        showToast('PeerJS konnte nicht geladen werden (Offline?). Lokal-Modus aktiv.');
+            <button
+              onclick="disconnectLobby(false)"
+              class="w-full py-3 rounded-2xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 font-bold text-xs uppercase tracking-wider transition active:scale-95"
+            >
+              Lobby schließen
+            </button>
+          </div>
+        `;
+        safeCreateIcons();
         return;
       }
 
-      const hostNameInput = document.getElementById('lobby-player-name');
-      const hostName = (hostNameInput ? hostNameInput.value.trim() : '') || state.players[0]?.name || 'Host';
+      if (state.lobby.role === 'client') {
+        body.innerHTML = `
+          <div class="bg-cyan-950/40 border border-cyan-500/40 rounded-2xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400">Verbunden mit Host</span>
+              <span class="font-display font-bold text-xl text-white">#${state.lobby.code}</span>
+            </div>
 
-      disconnectLobby(true);
+            <div class="space-y-1.5">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Spieler in der Lobby</p>
+              ${state.players.map((p, idx) => `
+                <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 rounded-xl px-3 py-2 text-xs">
+                  <span class="font-semibold text-white">${p.name}</span>
+                  <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${idx === 0 ? 'bg-purple-500/20 text-purple-300' : 'bg-zinc-800 text-zinc-300'}">
+                    ${idx === 0 ? 'Host' : 'Spieler'}
+                  </span>
+                </div>
+              `).join('')}
+            </div>
 
-      const code = generateLobbyCode();
-      const peerId = `drinkhub-gamenight-${code}`;
-
-      const hostPlayerId = state.players[0]?.id || ('p-' + Date.now());
-      state.players = [{ id: hostPlayerId, name: hostName, sips: state.players[0]?.sips || 0 }];
-      state.hasSetInitialName = true;
-      state.lobby.myPlayerId = hostPlayerId;
-      state.lobby.myName = hostName;
-      state.dbd.activeLivePlayerId = hostPlayerId;
-      try { localStorage.setItem('drinkhub_has_name', '1'); } catch (e) {}
-      savePlayers();
-
-      showToast(`Erstelle Lobby ${code}...`);
-
-      try {
-        const peer = new Peer(peerId, PEER_CONFIG);
-        state.lobby.peer = peer;
-        state.lobby.role = 'host';
-        state.lobby.code = code;
-        state.lobby.conns = [];
-
-        peer.on('open', () => {
-          updateLobbyBadge();
-          renderLobbyModal();
-          triggerRumble('light', false);
-          showToast(`Lobby ${code} aktiv! Du bist drin (1/4).`);
-        });
-
-        peer.on('connection', (conn) => {
-          state.lobby.conns.push(conn);
-
-          conn.on('open', () => {
-            broadcastState();
-          });
-
-          conn.on('data', (msg) => {
-            handleHostMessage(conn, msg);
-          });
-
-          conn.on('close', () => {
-            state.lobby.conns = state.lobby.conns.filter(c => c !== conn);
-            renderLobbyModal();
-            updateLobbyBadge();
-          });
-        });
-
-        peer.on('disconnected', () => {
-          if (peer && !peer.destroyed) {
-            try { peer.reconnect(); } catch (e) {}
-          }
-        });
-
-        peer.on('error', (err) => {
-          console.error('PeerJS Host Error:', err);
-          if (err.type === 'unavailable-id') {
-            hostLobby();
-          } else {
-            showToast(`P2P Hinweis (${err.type}) – Lokal-Modus aktiv.`);
-          }
-        });
-      } catch (e) {
-        showToast('P2P Start fehlgeschlagen – Lokal-Modus aktiv.');
-      }
-    }
-
-    function joinLobby() {
-      if (typeof Peer === 'undefined') {
-        showToast('PeerJS nicht verfügbar (Offline?).');
+            <button
+              onclick="disconnectLobby(false)"
+              class="w-full py-3 rounded-2xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 font-bold text-xs uppercase tracking-wider transition active:scale-95"
+            >
+              Lobby verlassen
+            </button>
+          </div>
+        `;
+        safeCreateIcons();
         return;
       }
 
-      const codeInput = document.getElementById('join-lobby-code');
-      const nameInput = document.getElementById('lobby-player-name');
-      const code = codeInput ? codeInput.value.replace(/\D/g, '').trim() : '';
-      const playerName = (nameInput ? nameInput.value.trim() : '') || 'Spieler';
+      body.innerHTML = `
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">Dein Name</label>
+            <input
+              type="text"
+              id="lobby-player-name"
+              value="${myName}"
+              maxlength="18"
+              placeholder="Spielername..."
+              class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+            />
+          </div>
 
-      if (code.length !== 4) {
-        showToast('Bitte einen 4-stelligen Lobby-Code eingeben!');
-        return;
-      }
+          <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Neue Lobby starten</span>
+              <span class="text-[10px] text-zinc-400">Max. 4 Spieler</span>
+            </div>
+            <p class="text-xs text-zinc-400">Erstelle einen 4-stelligen Code für deine Freunde.</p>
+            <button
+              onclick="hostLobby()"
+              class="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-display font-bold text-sm uppercase tracking-wider shadow-lg transition active:scale-95"
+            >
+              Lobby hosten
+            </button>
+          </div>
 
-      disconnectLobby(true);
-
-      const myId = 'p-' + Math.random().toString(36).substring(2, 7);
-      state.lobby.myPlayerId = myId;
-      state.lobby.myName = playerName;
-
-      showToast(`Verbinde mit Lobby ${code}...`);
-
-      try {
-        const peer = new Peer(PEER_CONFIG);
-        state.lobby.peer = peer;
-
-        const connectTimeout = setTimeout(() => {
-          if (state.lobby.role !== 'client') {
-            showToast('Zeitüberschreitung – prüfe den Code & ob beide Geräte Netz haben.');
-            disconnectLobby(true);
-          }
-        }, 10000);
-
-        peer.on('open', () => {
-          const conn = peer.connect(`drinkhub-gamenight-${code}`, {
-            reliable: true,
-            serialization: 'json'
-          });
-          state.lobby.hostConn = conn;
-
-          conn.on('open', () => {
-            clearTimeout(connectTimeout);
-            state.lobby.role = 'client';
-            state.lobby.code = code;
-            updateLobbyBadge();
-            triggerRumble('medium', false);
-            conn.send({
-              type: 'JOIN',
-              player: { id: myId, name: playerName, sips: 0 }
-            });
-            showToast(`Lobby ${code} beigetreten!`);
-            renderLobbyModal();
-          });
-
-          conn.on('data', (msg) => {
-            if (!msg || !msg.type) return;
-            if (msg.type === 'SYNC_STATE') {
-              applySyncedState(msg.payload);
-            } else if (msg.type === 'RUMBLE') {
-              triggerRumble(msg.strength, false);
-            }
-          });
-
-          conn.on('close', () => {
-            clearTimeout(connectTimeout);
-            showToast('Verbindung zum Host getrennt.');
-            disconnectLobby(true);
-          });
-
-          conn.on('error', () => {
-            clearTimeout(connectTimeout);
-            showToast('Verbindung zum Host fehlgeschlagen.');
-            disconnectLobby(true);
-          });
-        });
-
-        peer.on('error', (err) => {
-          clearTimeout(connectTimeout);
-          console.error('PeerJS Join Error:', err);
-          if (err.type === 'peer-unavailable') {
-            showToast(`Lobby #${code} existiert nicht (Code prüfen!).`);
-          } else {
-            showToast(`Verbindungsfehler (${err.type}).`);
-          }
-          disconnectLobby(true);
-        });
-      } catch (e) {
-        showToast('Fehler beim Beitreten.');
-      }
-    }
-
-    function handleHostMessage(conn, msg) {
-      if (!msg || !msg.type) return;
-
-      if (msg.type === 'JOIN' && msg.player) {
-        if (state.players.length >= 4) {
-          showToast(`${msg.player.name} wollte joinen, Lobby ist voll (4/4).`);
-          return;
-        }
-        const exists = state.players.find(p => p.id === msg.player.id);
-        if (!exists) {
-          state.players.push(msg.player);
-          savePlayers();
-          showToast(`${msg.player.name} ist der Lobby beigetreten!`);
-        }
-        broadcastState();
-        renderLobbyModal();
-        render();
-      } else if (msg.type === 'RUMBLE_REQUEST') {
-        triggerRumble(msg.strength, true);
-      } else if (msg.type === 'DBD_PREDICTION') {
-        if (!state.dbd.predictions[msg.playerId]) {
-          state.dbd.predictions[msg.playerId] = {};
-        }
-        state.dbd.predictions[msg.playerId][msg.targetId] = msg.prediction;
-        broadcastState();
-        render();
-      } else if (msg.type === 'DBD_READY') {
-        state.dbd.readyPlayers[msg.playerId] = Boolean(msg.ready);
-        if (areAllDbdPlayersReady()) {
-          startDbdLiveRound();
-        } else {
-          broadcastState();
-          render();
-        }
-      } else if (msg.type === 'DBD_LIVE_ACTION') {
-        applyDbdLiveAction(msg.action, msg.targetPlayerId, true);
-      } else if (msg.type === 'DBD_REVIEW_READY') {
-        state.dbd.reviewReadyPlayers[msg.playerId] = true;
-        if (areAllDbdPlayersReviewReady()) {
-          evaluateDbdMatch();
-        } else {
-          broadcastState();
-          render();
-        }
-      } else if (msg.type === 'DBD_NEW_ROUND') {
-        startSameModeNewRound(false);
-      }
-    }
-
-    function areAllDbdPlayersReady() {
-      const participants = getDbdParticipants();
-      if (participants.length === 0) return false;
-      return participants.every(p => Boolean(state.dbd.readyPlayers[p.id]));
-    }
-
-    function areAllDbdPlayersReviewReady() {
-      const participants = getDbdParticipants();
-      if (participants.length === 0) return false;
-      return participants.every(p => Boolean(state.dbd.reviewReadyPlayers[p.id]));
-    }
-
-    function broadcastState() {
-      if (state.lobby.role !== 'host') return;
-      const payload = {
-        view: state.view,
-        selectedGameId: state.selectedGameId,
-        players: state.players,
-        dbd: state.dbd
-      };
-      state.lobby.conns.forEach(conn => {
-        if (conn && conn.open) {
-          conn.send({ type: 'SYNC_STATE', payload });
-        }
-      });
-    }
-
-    function applySyncedState(payload) {
-      if (!payload) return;
-      const prevPhase = state.dbd?.phase;
-      state.view = payload.view;
-      state.selectedGameId = payload.selectedGameId;
-      state.players = payload.players;
-      state.dbd = payload.dbd;
-      updatePlayerBadge();
-      renderLobbyModal();
-      render();
-      if (prevPhase !== 'leaderboard' && state.dbd?.phase === 'leaderboard') {
-        recordCurrentMatchToArchive();
-      }
+          <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 space-y-2.5">
+            <span class="block text-xs font-bold uppercase tracking-wider text-cyan-400">Lobby beitreten</span>
+            <div class="flex gap-2">
+              <input
+                type="tel"
+                id="join-lobby-code"
+                inputmode="numeric"
+                maxlength="4"
+                placeholder="4-stelliger Code"
+                class="flex-1 bg-zinc-950 border border-zinc-700 rounded-2xl px-3.5 py-2.5 text-sm text-white tracking-widest placeholder-zinc-500 focus:outline-none focus:border-cyan-500"
+              />
+              <button
+                onclick="joinLobby()"
+                class="px-5 py-2.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95"
+              >
+                Join
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      safeCreateIcons();
     }
 
     function updatePlayerBadge() {
@@ -892,7 +672,7 @@
               spread: 55,
               origin: { x: 1, y: 0.7 }
             });
-          }, 280);
+          }, 200);
         }
       } catch (e) {}
     }

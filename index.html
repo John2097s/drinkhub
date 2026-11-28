@@ -111,6 +111,43 @@
     .sticker-badge {
       animation: stickerPulse 2.5s ease-in-out infinite;
     }
+
+    /* AAA Achievement Unpacking Reveal Animation */
+    @keyframes crateShake {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      20% { transform: rotate(-7deg) scale(1.04); }
+      40% { transform: rotate(7deg) scale(1.07); }
+      60% { transform: rotate(-5deg) scale(1.09); }
+      80% { transform: rotate(5deg) scale(1.05); }
+    }
+    @keyframes crateBurst {
+      0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+      50% { transform: scale(1.32); opacity: 1; filter: brightness(2.2); }
+      100% { transform: scale(0.3); opacity: 0; filter: brightness(3); }
+    }
+    @keyframes trophyUnpack {
+      0% { transform: translateY(28px) scale(0.35) rotateY(-80deg); opacity: 0; }
+      60% { transform: translateY(-8px) scale(1.08) rotateY(12deg); opacity: 1; }
+      82% { transform: translateY(3px) scale(0.97) rotateY(-4deg); opacity: 1; }
+      100% { transform: translateY(0) scale(1) rotateY(0deg); opacity: 1; }
+    }
+    @keyframes auraSpin {
+      0% { transform: rotate(0deg) scale(0.95); }
+      50% { transform: rotate(180deg) scale(1.08); }
+      100% { transform: rotate(360deg) scale(0.95); }
+    }
+    .anim-crate-shake {
+      animation: crateShake 0.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+    }
+    .anim-crate-burst {
+      animation: crateBurst 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .anim-trophy-unpack {
+      animation: trophyUnpack 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .anim-aura-spin {
+      animation: auraSpin 9s linear infinite;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col selection:bg-purple-500 selection:text-white text-sm sm:text-base">
@@ -135,25 +172,28 @@
           <h1 class="font-display font-bold text-lg sm:text-xl tracking-wider uppercase leading-none bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
             DrinkHub
           </h1>
-          <p class="text-[9px] sm:text-[10px] text-zinc-400 font-medium tracking-widest uppercase">Friends Edition</p>
+          <span class="block text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mt-0.5">
+            GameNight AAA
+          </span>
         </div>
       </div>
 
-      <!-- Lobby & Squad Controls -->
+      <!-- Squad, Lobby & Profil Controls -->
       <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        <button id="btn-open-lobby" onclick="toggleLobbyModal(true)" class="flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 px-2.5 sm:px-3 py-2 min-h-[40px] rounded-xl text-xs font-semibold transition active:scale-95">
+        <button id="btn-open-lobby" onclick="toggleLobbyModal(true)" class="flex items-center gap-1.5 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 px-2.5 sm:px-3 py-2 min-h-[40px] rounded-xl text-xs font-semibold transition active:scale-95 shadow-sm">
           <span id="lobby-status-dot" class="w-2 h-2 rounded-full bg-zinc-500 shrink-0"></span>
           <span id="lobby-btn-text" class="text-zinc-200 truncate max-w-[95px] sm:max-w-none">Lobby</span>
         </button>
 
-        <button onclick="togglePlayerModal(true)" class="flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 px-2.5 sm:px-3 py-2 min-h-[40px] rounded-xl text-xs font-semibold transition active:scale-95">
+        <button onclick="togglePlayerModal(true)" class="flex items-center gap-1.5 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 px-2.5 sm:px-3 py-2 min-h-[40px] rounded-xl text-xs font-semibold transition active:scale-95 shadow-sm">
           <i data-lucide="users" class="w-4 h-4 text-cyan-400 shrink-0"></i>
           <span id="player-count-badge" class="text-zinc-200">0</span>
         </button>
 
-        <button onclick="openProfileView()" class="flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 px-2.5 sm:px-3 py-2 min-h-[40px] rounded-xl text-xs font-semibold transition active:scale-95" title="Profil & Archiv">
-          <i data-lucide="user-check" class="w-4 h-4 text-purple-400 shrink-0"></i>
+        <button onclick="openProfileView()" class="relative flex items-center gap-1.5 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 px-2.5 sm:px-3 py-2 min-h-[40px] rounded-xl text-xs font-semibold transition active:scale-95 shadow-sm" title="Profil, Achievements & Archiv">
+          <i data-lucide="trophy" class="w-4 h-4 text-amber-400 shrink-0"></i>
           <span class="hidden sm:inline text-zinc-200">Profil</span>
+          <span id="profile-ach-badge" class="text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded-md">0/5</span>
         </button>
       </div>
     </div>
@@ -163,6 +203,11 @@
   <main id="app-container" class="relative z-10 flex-1 max-w-3xl w-full mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-24">
     <!-- Wird dynamisch per JS gerendert -->
   </main>
+
+  <!-- AAA Achievement Unpacking Overlay -->
+  <div id="achievement-overlay" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
+    <!-- Wird von AchievementAnimation gesteuert -->
+  </div>
 
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 translate-y-4 w-[90%] max-w-sm">
@@ -242,7 +287,7 @@
   <!-- Application Logic & Game Database -->
   <script>
     // =========================================================================
-    // 1. DEAD BY DAYLIGHT DATENBANK (KILLER BIS 2026 & ALLE EXHAUSTION PERKS)
+    // 1. DEAD BY DAYLIGHT DATENBANK (INKL. TERRIFIER CHAPTER 10.3.0)
     // =========================================================================
     const DBD_KILLERS = [
       "The Trapper (Fallensteller)",
@@ -286,7 +331,58 @@
       "The Ghoul (Ken Kaneki)",
       "The Animatronic (Springtrap)",
       "The Krasue (Krasue)",
-      "The Judgement"
+      "The Judgement",
+      "The Terrifier (Art the Clown)"
+    ];
+
+    const DBD_SURVIVORS = [
+      "Sienna Shaw",
+      "Dwight Fairfield",
+      "Meg Thomas",
+      "Claudette Morel",
+      "Jake Park",
+      "Nea Karlsson",
+      "Laurie Strode",
+      "Ace Visconti",
+      "William 'Bill' Overbeck",
+      "Feng Min",
+      "David King",
+      "Quentin Smith",
+      "David Tapp",
+      "Kate Denson",
+      "Adam Francis",
+      "Jeff Johansen",
+      "Jane Romero",
+      "Ash Williams",
+      "Nancy Wheeler",
+      "Steve Harrington",
+      "Yui Kimura",
+      "Zarina Kassir",
+      "Cheryl Mason",
+      "Felix Richter",
+      "Élodie Rakoto",
+      "Yun-Jin Lee",
+      "Jill Valentine",
+      "Leon S. Kennedy",
+      "Mikaela Reid",
+      "Jonah Vasquez",
+      "Yoichi Asakawa",
+      "Haddie Kaur",
+      "Ada Wong",
+      "Rebecca Chambers",
+      "Vittorio Toscano",
+      "Thalita Lyra",
+      "Renato Lyra",
+      "Gabriel Soma",
+      "Nicolas Cage",
+      "Ellen Ripley",
+      "Alan Wake",
+      "Sable Ward",
+      "Aestri Yazar & Baermar Uraz",
+      "Lara Croft",
+      "Trevor Belmont",
+      "Taurie Cain",
+      "Orela Rose"
     ];
 
     const DBD_EXHAUSTION_PERKS = [
@@ -322,21 +418,189 @@
       "Withered Isle",
       "The Decimated Borgo",
       "Dvarka Deepwood",
-      "Sleepless District"
+      "Sleepless District",
+      "Hartshorne Mall"
     ];
 
     // =========================================================================
-    // 2. MODULARES SPIELE-REGISTRY (AKTUELL NUR DBD FOKUSSIERTER HUB)
+    // 2. ACHIEVEMENT-SYSTEM & AAA UNPACKING REVEAL ANIMATION MODULE
     // =========================================================================
-    // Andere Spiele sind vorerst für maximale Performance entfernt und können
-    // über `registerGameModule(...)` später problemlos ergänzt werden.
+    const ACHIEVEMENTS_DEF = [
+      {
+        id: 'first_shot',
+        title: 'Der Erste Shot',
+        desc: 'Trinke deinen allerersten Shot.',
+        target: 1,
+        tier: 'Bronze',
+        gradient: 'from-amber-600 via-orange-500 to-amber-700',
+        border: 'border-amber-400/60',
+        glow: 'shadow-amber-500/40'
+      },
+      {
+        id: 'small_start',
+        title: 'Jeder Anfang fängt klein an',
+        desc: 'Erreiche insgesamt 100 getrunkene Shots.',
+        target: 100,
+        tier: 'Silber',
+        gradient: 'from-slate-300 via-cyan-300 to-slate-500',
+        border: 'border-cyan-300/60',
+        glow: 'shadow-cyan-400/40'
+      },
+      {
+        id: 'good_boy',
+        title: 'Good Boy',
+        desc: 'Erreiche insgesamt 500 getrunkene Shots.',
+        target: 500,
+        tier: 'Gold',
+        gradient: 'from-yellow-400 via-amber-400 to-orange-500',
+        border: 'border-yellow-300/70',
+        glow: 'shadow-yellow-400/50'
+      },
+      {
+        id: 'recruit',
+        title: 'Rekrut',
+        desc: 'Erreiche insgesamt 1.000 getrunkene Shots.',
+        target: 1000,
+        tier: 'Platin',
+        gradient: 'from-purple-500 via-pink-500 to-cyan-400',
+        border: 'border-purple-400/70',
+        glow: 'shadow-purple-500/50'
+      },
+      {
+        id: 'average_enjoyer',
+        title: 'Durchschnittlicher Genießer',
+        desc: 'Schalte alle 4 Shot-Achievements frei.',
+        target: 4,
+        isMeta: true,
+        tier: 'Legendär',
+        gradient: 'from-amber-400 via-rose-500 to-purple-600',
+        border: 'border-amber-300/80',
+        glow: 'shadow-rose-500/60'
+      }
+    ];
+
+    const AchievementAnimation = (() => {
+      const queue = [];
+      let isPlaying = false;
+
+      function enqueue(achievement) {
+        if (!achievement) return;
+        queue.push(achievement);
+        if (!isPlaying) playNext();
+      }
+
+      function playNext() {
+        if (queue.length === 0) {
+          isPlaying = false;
+          return;
+        }
+        isPlaying = true;
+        const ach = queue.shift();
+        const overlay = document.getElementById('achievement-overlay');
+        if (!overlay) {
+          isPlaying = false;
+          return;
+        }
+
+        // Phase 1: Mystery Trophy Crate (Shake)
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        overlay.innerHTML = `
+          <div class="relative max-w-sm w-full flex flex-col items-center justify-center text-center select-none">
+            <div class="absolute w-56 h-56 rounded-full bg-gradient-to-tr ${ach.gradient} opacity-25 blur-2xl anim-aura-spin"></div>
+            <div id="ach-crate-box" class="relative z-10 w-28 h-28 rounded-3xl bg-gradient-to-br ${ach.gradient} p-[2px] shadow-2xl ${ach.glow} anim-crate-shake">
+              <div class="w-full h-full rounded-[22px] bg-zinc-950/90 flex flex-col items-center justify-center">
+                <span class="text-5xl">🏆</span>
+              </div>
+            </div>
+            <p class="relative z-10 mt-4 font-display font-bold text-sm uppercase tracking-[0.25em] text-amber-300 animate-pulse">
+              Achievement wird enthüllt...
+            </p>
+          </div>
+        `;
+
+        triggerRumble('medium', false);
+
+        // Phase 2: Burst + Unpack Reveal Card
+        setTimeout(() => {
+          const crate = document.getElementById('ach-crate-box');
+          if (crate) {
+            crate.classList.remove('anim-crate-shake');
+            crate.classList.add('anim-crate-burst');
+          }
+        }, 620);
+
+        setTimeout(() => {
+          triggerRumble('heavy', false);
+          try {
+            if (typeof confetti === 'function') {
+              confetti({
+                particleCount: 70,
+                spread: 65,
+                origin: { y: 0.55 },
+                colors: ['#fbbf24', '#a855f7', '#06b6d4', '#f43f5e']
+              });
+            }
+          } catch (e) {}
+
+          overlay.innerHTML = `
+            <div class="relative max-w-sm w-full glass-card rounded-3xl p-6 border-2 ${ach.border} shadow-2xl ${ach.glow} text-center space-y-4 anim-trophy-unpack overflow-hidden">
+              <div class="absolute -inset-12 bg-gradient-to-tr ${ach.gradient} opacity-15 blur-2xl pointer-events-none"></div>
+
+              <div class="relative z-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-extrabold uppercase tracking-widest">
+                <span>🏆</span>
+                <span>Freigeschaltet · ${ach.tier}</span>
+              </div>
+
+              <div class="relative z-10 mx-auto w-24 h-24 rounded-3xl bg-gradient-to-br ${ach.gradient} p-[2px] shadow-xl ${ach.glow}">
+                <div class="w-full h-full rounded-[22px] bg-zinc-950 flex items-center justify-center text-5xl">
+                  🏆
+                </div>
+              </div>
+
+              <div class="relative z-10 space-y-1">
+                <h3 class="font-display font-extrabold text-2xl sm:text-3xl text-white uppercase tracking-wide">
+                  ${ach.title}
+                </h3>
+                <p class="text-xs text-zinc-300 leading-relaxed">
+                  ${ach.desc}
+                </p>
+              </div>
+
+              <button
+                onclick="AchievementAnimation.dismiss()"
+                class="relative z-10 w-full py-3 rounded-2xl bg-gradient-to-r ${ach.gradient} text-zinc-950 font-display font-extrabold text-sm uppercase tracking-wider shadow-lg transition active:scale-95"
+              >
+                Weiter
+              </button>
+            </div>
+          `;
+        }, 940);
+      }
+
+      function dismiss() {
+        const overlay = document.getElementById('achievement-overlay');
+        if (overlay) {
+          overlay.classList.add('hidden');
+          overlay.classList.remove('flex');
+          overlay.innerHTML = '';
+        }
+        setTimeout(playNext, 180);
+      }
+
+      return { enqueue, dismiss };
+    })();
+
+    // =========================================================================
+    // 3. MODULARES SPIELE-REGISTRY (AKTUELL NUR DBD FOKUSSIERTER HUB)
+    // =========================================================================
     const GAME_MODULES = [
       {
         id: 'dead-by-daylight',
         title: 'Dead by Daylight',
-        subtitle: 'Survivor, Killer & Zuschauer-Wetten + Live Tracker',
+        subtitle: 'Survivor, Killer & Zuschauer-Wetten · Patch 10.3.0 (Terrifier)',
         genre: 'horror',
-        badge: 'Aktiv',
+        badge: 'Terrifier Update',
         accent: 'from-rose-700 to-zinc-900',
         borderAccent: 'border-rose-500/50',
         icon: 'skull',
@@ -352,7 +616,7 @@
     }
 
     // =========================================================================
-    // 3. APP STATE, PROFIL-ARCHIV & PERSISTENCE
+    // 4. APP STATE, PROFIL-ARCHIV, LIFETIME-SHOTS & PERSISTENCE
     // =========================================================================
     let state = {
       view: 'hub',
@@ -360,9 +624,14 @@
       hasSetInitialName: false,
       players: [],
       profileArchive: [],
+      careerStats: {
+        lifetimeShots: 0,
+        unlockedAchievements: []
+      },
       lobby: {
         role: 'offline',
         code: '',
+        hostId: '',
         peer: null,
         conns: [],
         hostConn: null,
@@ -388,8 +657,8 @@
           survivorsEscaped: 0
         },
         actualOutcome: {
-          killer: DBD_KILLERS[0],
-          map: DBD_MAPS[0],
+          killer: DBD_KILLERS[DBD_KILLERS.length - 1],
+          map: DBD_MAPS[DBD_MAPS.length - 1],
           exhaustionPerk: DBD_EXHAUSTION_PERKS[0].id
         },
         reviewReadyPlayers: {},
@@ -417,8 +686,71 @@
           state.profileArchive = parsedArchive;
         }
       }
+      const savedCareer = localStorage.getItem('drinkhub_career_stats');
+      if (savedCareer) {
+        const parsedCareer = JSON.parse(savedCareer);
+        if (parsedCareer && typeof parsedCareer === 'object') {
+          state.careerStats.lifetimeShots = Number(parsedCareer.lifetimeShots) || 0;
+          state.careerStats.unlockedAchievements = Array.isArray(parsedCareer.unlockedAchievements)
+            ? parsedCareer.unlockedAchievements
+            : [];
+        }
+      }
     } catch (e) {
       console.warn('LocalStorage nicht verfügbar:', e);
+    }
+
+    function saveCareerStats() {
+      try {
+        localStorage.setItem('drinkhub_career_stats', JSON.stringify(state.careerStats));
+      } catch (e) {}
+      updateProfileAchBadge();
+    }
+
+    function updateProfileAchBadge() {
+      const el = document.getElementById('profile-ach-badge');
+      if (el) {
+        el.textContent = `${state.careerStats.unlockedAchievements.length}/${ACHIEVEMENTS_DEF.length}`;
+      }
+    }
+
+    function evaluateAchievements() {
+      const unlocked = new Set(state.careerStats.unlockedAchievements || []);
+      const totalShots = Number(state.careerStats.lifetimeShots) || 0;
+      let changed = false;
+
+      // 1-4: Shot-Milestones prüfen
+      ACHIEVEMENTS_DEF.filter(a => !a.isMeta).forEach(ach => {
+        if (!unlocked.has(ach.id) && totalShots >= ach.target) {
+          unlocked.add(ach.id);
+          changed = true;
+          AchievementAnimation.enqueue(ach);
+        }
+      });
+
+      // 5: Meta-Achievement "Durchschnittlicher Genießer" prüfen
+      const metaAch = ACHIEVEMENTS_DEF.find(a => a.isMeta);
+      const baseCount = ACHIEVEMENTS_DEF.filter(a => !a.isMeta && unlocked.has(a.id)).length;
+      if (metaAch && !unlocked.has(metaAch.id) && baseCount >= 4) {
+        unlocked.add(metaAch.id);
+        changed = true;
+        AchievementAnimation.enqueue(metaAch);
+      }
+
+      if (changed) {
+        state.careerStats.unlockedAchievements = Array.from(unlocked);
+        saveCareerStats();
+      } else {
+        updateProfileAchBadge();
+      }
+    }
+
+    function addPersonalCareerShots(delta) {
+      const amount = Number(delta) || 0;
+      if (amount <= 0) return;
+      state.careerStats.lifetimeShots = (Number(state.careerStats.lifetimeShots) || 0) + amount;
+      saveCareerStats();
+      evaluateAchievements();
     }
 
     function saveArchive() {
@@ -445,7 +777,7 @@
         localStorage.setItem('drinkhub_has_name', '1');
       } catch (err) {}
       savePlayers();
-      triggerRumble('medium');
+      triggerRumble('medium', false);
       showToast(`Willkommen, ${name}!`);
       render();
     }
@@ -492,17 +824,23 @@
       }
     }
 
+    function isPlayerLobbyHost(playerId, index) {
+      if (state.lobby.role === 'offline') return index === 0;
+      if (state.lobby.hostId) return playerId === state.lobby.hostId;
+      return index === 0;
+    }
+
     function renderLobbyModal() {
       const body = document.getElementById('lobby-modal-body');
       if (!body) return;
 
-      const myName = state.lobby.myName || state.players[0]?.name || 'Spieler';
+      const myName = state.lobby.myName || state.players.find(p => p.id === state.lobby.myPlayerId)?.name || state.players[0]?.name || 'Spieler';
 
       if (state.lobby.role === 'host') {
         body.innerHTML = `
           <div class="bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Host aktiv</span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Du bist Host</span>
               <span class="text-xs font-semibold text-zinc-300">${state.players.length}/4 Spieler</span>
             </div>
 
@@ -522,14 +860,18 @@
 
             <div class="space-y-1.5">
               <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Verbundenes Squad</p>
-              ${state.players.map((p, idx) => `
-                <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 rounded-xl px-3 py-2 text-xs">
-                  <span class="font-semibold text-white">${p.name}</span>
-                  <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${idx === 0 ? 'bg-purple-500/20 text-purple-300' : 'bg-cyan-500/20 text-cyan-300'}">
-                    ${idx === 0 ? 'Host' : 'Client'}
-                  </span>
-                </div>
-              `).join('')}
+              ${state.players.map((p, idx) => {
+                const isHost = isPlayerLobbyHost(p.id, idx);
+                const isMe = p.id === state.lobby.myPlayerId;
+                return `
+                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 rounded-xl px-3 py-2 text-xs">
+                    <span class="font-semibold text-white">${p.name} ${isMe ? '(Du)' : ''}</span>
+                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${isHost ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-cyan-500/20 text-cyan-300'}">
+                      ${isHost ? 'Host' : 'Mitspieler'}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
             </div>
 
             <button
@@ -548,20 +890,24 @@
         body.innerHTML = `
           <div class="bg-cyan-950/40 border border-cyan-500/40 rounded-2xl p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400">Verbunden mit Host</span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400">Mitspieler · Verbunden</span>
               <span class="font-display font-bold text-xl text-white">#${state.lobby.code}</span>
             </div>
 
             <div class="space-y-1.5">
               <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Spieler in der Lobby</p>
-              ${state.players.map((p, idx) => `
-                <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 rounded-xl px-3 py-2 text-xs">
-                  <span class="font-semibold text-white">${p.name}</span>
-                  <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${idx === 0 ? 'bg-purple-500/20 text-purple-300' : 'bg-zinc-800 text-zinc-300'}">
-                    ${idx === 0 ? 'Host' : 'Spieler'}
-                  </span>
-                </div>
-              `).join('')}
+              ${state.players.map((p, idx) => {
+                const isHost = isPlayerLobbyHost(p.id, idx);
+                const isMe = p.id === state.lobby.myPlayerId;
+                return `
+                  <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 rounded-xl px-3 py-2 text-xs">
+                    <span class="font-semibold text-white">${p.name} ${isMe ? '(Du)' : ''}</span>
+                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${isHost ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-zinc-800 text-zinc-300'}">
+                      ${isHost ? 'Host' : 'Mitspieler'}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
             </div>
 
             <button
@@ -635,22 +981,47 @@
       }
     }
 
-    function triggerRumble(pattern = [120, 60, 180]) {
+    /**
+     * Einheitlicher Vibrations-Helper: IMMER nur ein einzelner Impuls ("1 Brr"),
+     * abgestuft nur über die Vibrationsstärke/Dauer ('light', 'medium', 'heavy').
+     * Wenn broadcastToPeers = true und Host aktiv ist, vibrieren alle verbundenen Geräte mit.
+     */
+    function triggerRumble(strength = 'medium', broadcastToPeers = false) {
+      const durationMap = {
+        light: 45,
+        medium: 110,
+        heavy: 240
+      };
+      const ms = typeof strength === 'number'
+        ? Math.max(30, strength)
+        : (durationMap[strength] || 110);
+
       try {
         if (typeof navigator !== 'undefined') {
           const vibFn = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate;
           if (typeof vibFn === 'function') {
-            const normalizedPattern = Array.isArray(pattern)
-              ? pattern.map(ms => Math.max(20, Number(ms) || 50))
-              : [Math.max(40, Number(pattern) || 120)];
-            vibFn.call(navigator, normalizedPattern);
+            vibFn.call(navigator, ms);
           }
         }
       } catch (e) {}
+
+      if (broadcastToPeers) {
+        if (state.lobby.role === 'host' && Array.isArray(state.lobby.conns)) {
+          state.lobby.conns.forEach(conn => {
+            try {
+              if (conn && conn.open) conn.send({ type: 'RUMBLE', strength });
+            } catch (e) {}
+          });
+        } else if (state.lobby.role === 'client' && state.lobby.hostConn && state.lobby.hostConn.open) {
+          try {
+            state.lobby.hostConn.send({ type: 'RUMBLE_REQUEST', strength });
+          } catch (e) {}
+        }
+      }
     }
 
     function triggerVictoryConfetti() {
-      triggerRumble([100, 50, 100, 50, 250]);
+      triggerRumble('heavy', true);
       try {
         if (typeof confetti === 'function') {
           confetti({
@@ -684,7 +1055,7 @@
 
       if (state.lobby.role === 'host') {
         dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0';
-        txt.textContent = `${state.lobby.code} (${state.players.length}/4)`;
+        txt.textContent = `Host #${state.lobby.code} (${state.players.length}/4)`;
       } else if (state.lobby.role === 'client') {
         dot.className = 'w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0';
         txt.textContent = `#${state.lobby.code}`;
@@ -695,7 +1066,7 @@
     }
 
     // =========================================================================
-    // 4. P2P MULTIPLAYER LOBBY (PEERJS)
+    // 5. P2P MULTIPLAYER LOBBY (PEERJS)
     // =========================================================================
     function generateLobbyCode() {
       return String(Math.floor(1000 + Math.random() * 9000));
@@ -728,13 +1099,10 @@
 
         state.lobby.myName = myName;
         state.lobby.myPlayerId = myId;
+        state.lobby.hostId = myId;
 
-        if (!state.players.some(p => p.id === myId)) {
-          state.players.unshift({ id: myId, name: myName, sips: 0 });
-        } else {
-          const existing = state.players.find(p => p.id === myId);
-          if (existing) existing.name = myName;
-        }
+        const existingMe = state.players.find(p => p.id === myId);
+        state.players = [{ id: myId, name: myName, sips: existingMe ? existingMe.sips : 0 }];
         savePlayers();
 
         disconnectLobby(true);
@@ -744,6 +1112,7 @@
 
         state.lobby.role = 'host';
         state.lobby.code = code;
+        state.lobby.hostId = myId;
         state.lobby.peer = peer;
         state.lobby.conns = [];
         state.lobby.hostConn = null;
@@ -890,6 +1259,7 @@
 
       state.lobby.role = 'offline';
       state.lobby.code = '';
+      state.lobby.hostId = '';
       updateLobbyBadge();
       if (!silent) {
         showToast('Lobby verlassen.');
@@ -937,7 +1307,11 @@
           render();
         }
       } else if (data.type === 'DBD_LIVE_ACTION') {
+        // Live-Counter des gejointen Mitspielers sofort auf dem Host übernehmen & rendern
         applyDbdLiveAction(data.action, data.targetPlayerId, true);
+        if (state.view === 'game' && state.dbd.phase === 'live') {
+          render();
+        }
       } else if (data.type === 'DBD_REVIEW_READY') {
         if (!data.playerId) return;
         state.dbd.reviewReadyPlayers[data.playerId] = true;
@@ -949,6 +1323,8 @@
         }
       } else if (data.type === 'DBD_NEW_ROUND') {
         startSameModeNewRound(true);
+      } else if (data.type === 'RUMBLE_REQUEST') {
+        triggerRumble(data.strength || 'medium', true);
       }
     }
 
@@ -962,9 +1338,28 @@
         return;
       }
 
+      if (data.type === 'RUMBLE') {
+        triggerRumble(data.strength || 'medium', false);
+        return;
+      }
+
+      if (data.type === 'ARCHIVE_SYNC' && data.entry) {
+        if (!state.profileArchive.some(item => item.id === data.entry.id)) {
+          state.profileArchive.unshift(data.entry);
+          saveArchive();
+        }
+        const myRes = (data.entry.leaderboard || []).find(r => r.playerId === state.lobby.myPlayerId);
+        if (myRes && Number(myRes.shots) > 0) {
+          addPersonalCareerShots(Number(myRes.shots));
+        }
+        if (state.view === 'profile') render();
+        return;
+      }
+
       if (data.type === 'STATE_SYNC' && data.payload) {
         const p = data.payload;
         if (Array.isArray(p.players)) state.players = p.players;
+        if (p.hostId) state.lobby.hostId = p.hostId;
         if (p.view) state.view = p.view;
         if (p.selectedGameId !== undefined) state.selectedGameId = p.selectedGameId;
         if (p.dbd) state.dbd = p.dbd;
@@ -981,6 +1376,7 @@
     function broadcastState() {
       if (state.lobby.role !== 'host' || !Array.isArray(state.lobby.conns)) return;
       const payload = {
+        hostId: state.lobby.hostId || state.lobby.myPlayerId,
         players: state.players,
         view: state.view,
         selectedGameId: state.selectedGameId,
@@ -990,6 +1386,17 @@
         try {
           if (conn && conn.open) {
             conn.send({ type: 'STATE_SYNC', payload });
+          }
+        } catch (e) {}
+      });
+    }
+
+    function broadcastArchiveEntry(entry) {
+      if (state.lobby.role !== 'host' || !Array.isArray(state.lobby.conns) || !entry) return;
+      state.lobby.conns.forEach(conn => {
+        try {
+          if (conn && conn.open) {
+            conn.send({ type: 'ARCHIVE_SYNC', entry });
           }
         } catch (e) {}
       });
@@ -1008,7 +1415,7 @@
     }
 
     // =========================================================================
-    // 5. NAVIGATION, PROFIL-ARCHIV & SQUAD-VERWALTUNG
+    // 6. NAVIGATION, PROFIL-ARCHIV & SQUAD-VERWALTUNG
     // =========================================================================
     let selectedArchiveEntryId = null;
 
@@ -1023,6 +1430,7 @@
     function openProfileView() {
       state.view = 'profile';
       selectedArchiveEntryId = null;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       render();
     }
 
@@ -1035,42 +1443,18 @@
       const item = GAME_MODULES.find(g => g.id === id);
       if (!item) return;
 
-      if (item.isFranchise) {
-        state.view = 'franchise';
-        state.selectedFranchiseId = item.id;
-      } else {
-        state.view = 'game';
-        state.selectedGameId = item.id;
-        state.activeTab = 'rules';
-        state.currentCard = null;
-        if (item.isCustomDbd) {
-          resetDbdMatch('role');
-        }
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (state.lobby.role === 'host') broadcastState();
-      render();
-    }
-
-    function openSubGame(franchiseId, subGameId) {
       state.view = 'game';
-      state.selectedFranchiseId = franchiseId;
-      state.selectedGameId = subGameId;
-      state.activeTab = 'rules';
-      state.currentCard = null;
+      state.selectedGameId = item.id;
+      if (item.isCustomDbd) {
+        resetDbdMatch('role');
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (state.lobby.role === 'host') broadcastState();
       render();
     }
 
     function getActiveGame() {
-      if (state.selectedFranchiseId) {
-        const franchise = GAMES_DB.find(g => g.id === state.selectedFranchiseId);
-        if (franchise) {
-          return franchise.subGames.find(s => s.id === state.selectedGameId);
-        }
-      }
-      return GAMES_DB.find(g => g.id === state.selectedGameId);
+      return GAME_MODULES.find(g => g.id === state.selectedGameId);
     }
 
     function togglePlayerModal(show) {
@@ -1118,6 +1502,9 @@
       const player = state.players.find(p => p.id === id);
       if (!player) return;
       player.sips = Math.max(0, player.sips + delta);
+      if (delta > 0 && id === state.lobby.myPlayerId) {
+        addPersonalCareerShots(delta);
+      }
       savePlayers();
       renderPlayersList();
     }
@@ -1133,26 +1520,43 @@
       const container = document.getElementById('players-list');
       if (!container) return;
 
-      container.innerHTML = state.players.map((p, idx) => `
-        <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3 flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-sm text-white truncate">${p.name}</span>
-              ${idx === 0 ? '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Du / Host</span>' : ''}
+      container.innerHTML = state.players.map((p, idx) => {
+        const isHost = isPlayerLobbyHost(p.id, idx);
+        const isMe = p.id === state.lobby.myPlayerId;
+        let roleBadge = '';
+        if (state.lobby.role === 'offline') {
+          if (isMe) {
+            roleBadge = '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Du</span>';
+          }
+        } else if (isHost) {
+          roleBadge = `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">${isMe ? 'Du · Host' : 'Host'}</span>`;
+        } else if (isMe) {
+          roleBadge = '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Du</span>';
+        } else {
+          roleBadge = '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">Mitspieler</span>';
+        }
+
+        return `
+          <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-sm text-white truncate">${p.name}</span>
+                ${roleBadge}
+              </div>
+              <p class="text-xs text-amber-400 font-semibold mt-0.5">${p.sips} ${p.sips === 1 ? 'Schluck' : 'Schlucke'}</p>
             </div>
-            <p class="text-xs text-amber-400 font-semibold mt-0.5">${p.sips} ${p.sips === 1 ? 'Schluck' : 'Schlucke'}</p>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="adjustPlayerSips('${p.id}', -1)" class="w-8 h-8 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-sm active:scale-90">-</button>
+              <button onclick="adjustPlayerSips('${p.id}', 1)" class="w-8 h-8 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold text-sm active:scale-90">+</button>
+              ${state.players.length > 1 ? `
+                <button onclick="removePlayer('${p.id}')" class="w-8 h-8 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 flex items-center justify-center active:scale-90" title="Entfernen">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              ` : ''}
+            </div>
           </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button onclick="adjustPlayerSips('${p.id}', -1)" class="w-8 h-8 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-sm active:scale-90">-</button>
-            <button onclick="adjustPlayerSips('${p.id}', 1)" class="w-8 h-8 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold text-sm active:scale-90">+</button>
-            ${state.players.length > 1 ? `
-              <button onclick="removePlayer('${p.id}')" class="w-8 h-8 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 flex items-center justify-center active:scale-90" title="Entfernen">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
       safeCreateIcons();
     }
 
@@ -1184,10 +1588,6 @@
       return state.dbd.liveStats.byPlayer[playerId];
     }
 
-    /**
-     * Gezielte DOM-Aktualisierung ohne komplettes Neuzeichnen des gesamten Screens,
-     * damit beim Eintragen von Stats kein Flackern entsteht.
-     */
     function patchLiveCounterText(id, value) {
       const el = document.getElementById(id);
       if (el) el.textContent = String(value);
@@ -1211,7 +1611,7 @@
     }
 
     // =========================================================================
-    // 6. DEAD BY DAYLIGHT LOGIK (SURVIVOR, KILLER, ZUSCHAUER & AUSWERTUNG)
+    // 7. DEAD BY DAYLIGHT LOGIK (SURVIVOR, KILLER, ZUSCHAUER & AUSWERTUNG)
     // =========================================================================
     function resetDbdMatch(targetPhase = 'role', rotateKiller = false) {
       const byPlayer = {};
@@ -1247,8 +1647,8 @@
           survivorsEscaped: 0
         },
         actualOutcome: {
-          killer: DBD_KILLERS[0],
-          map: DBD_MAPS[0],
+          killer: DBD_KILLERS[DBD_KILLERS.length - 1],
+          map: DBD_MAPS[DBD_MAPS.length - 1],
           exhaustionPerk: DBD_EXHAUSTION_PERKS[0].id
         },
         reviewReadyPlayers: {},
@@ -1258,10 +1658,6 @@
       render();
     }
 
-    /**
-     * Startet eine komplett neue Runde im exakt aktuellen Modus (Survivor / Killer / Zuschauer)
-     * und rotiert den Killer nur dann, wenn der aktuelle Modus ein Killer-Modus ist.
-     */
     function startSameModeNewRound(fromRemote = false) {
       if (state.lobby.role === 'client' && !fromRemote) {
         state.lobby.hostConn.send({ type: 'DBD_NEW_ROUND' });
@@ -1305,8 +1701,8 @@
           survivorsEscaped: 0
         },
         actualOutcome: {
-          killer: DBD_KILLERS[0],
-          map: DBD_MAPS[0],
+          killer: DBD_KILLERS[DBD_KILLERS.length - 1],
+          map: DBD_MAPS[DBD_MAPS.length - 1],
           exhaustionPerk: DBD_EXHAUSTION_PERKS[0].id
         },
         reviewReadyPlayers: {},
@@ -1349,8 +1745,8 @@
       }
       if (!state.dbd.predictions[predictorId][targetId]) {
         state.dbd.predictions[predictorId][targetId] = {
-          killer: DBD_KILLERS[0],
-          map: DBD_MAPS[0],
+          killer: DBD_KILLERS[DBD_KILLERS.length - 1],
+          map: DBD_MAPS[DBD_MAPS.length - 1],
           missedChecks: 1,
           hooks: 1,
           escaped: 2,
@@ -1410,11 +1806,6 @@
       render();
     }
 
-    /**
-     * Step-by-Step Tipp-Flow: erst nacheinander jeden Ziel-Spieler abarbeiten,
-     * danach erst als "Bereit" markieren. Bei 3+ Spielern im Offline-Modus öffnet sich
-     * danach das nächste Spieler-Pop-Up / Step für den nächsten Spieler.
-     */
     function advancePredictionOrReady(predictorId, totalTargets) {
       const nextStep = (state.dbd.activeTargetStep || 0) + 1;
       if (nextStep < totalTargets) {
@@ -1508,7 +1899,8 @@
           pStats.missedChecks++;
           triggerRumble('medium', !fromRemote);
           patchLiveCounterText('live-count-missed', pStats.missedChecks);
-          if (!fromRemote) showToast(`${pName}: Skillcheck verfehlt (+1 Shot)`);
+          patchLiveCounterText(`squad-live-missed-${targetPlayerId}`, pStats.missedChecks);
+          showToast(`${pName}: Skillcheck verfehlt (+1 Shot)`);
         } else if (action === 'hook') {
           if (pStats.hooks >= 3) {
             if (!fromRemote) showToast(`${pName} ist bereits bei 3/3 Haken (Tot)!`);
@@ -1516,25 +1908,28 @@
           }
           pStats.hooks++;
           patchLiveCounterText('live-count-hooks', `${pStats.hooks}/3`);
+          patchLiveCounterText(`squad-live-hooks-${targetPlayerId}`, `${pStats.hooks}/3`);
           if (pStats.hooks === 3) {
             triggerRumble('heavy', !fromRemote);
-            if (!fromRemote) showToast(`${pName}: 3. Haken = TOD (+3 Shots)!`);
+            showToast(`${pName}: 3. Haken = TOD (+3 Shots)!`);
           } else {
             triggerRumble('medium', !fromRemote);
-            if (!fromRemote) showToast(`${pName}: Haken ${pStats.hooks}/3 (+1 Shot)`);
+            showToast(`${pName}: Haken ${pStats.hooks}/3 (+1 Shot)`);
           }
         } else if (action === 'stunBlind') {
           pStats.stunsBlinds++;
           triggerRumble('light', !fromRemote);
           patchLiveCounterText('live-count-stun', pStats.stunsBlinds);
           patchLiveCounterText('live-player-points', (pStats.stunsBlinds + pStats.healsUnhooks) * 10);
-          if (!fromRemote) showToast(`${pName}: Killer gestunt/geblendet (+10 Pkt)`);
+          patchLiveCounterText(`squad-live-pts-${targetPlayerId}`, `${(pStats.stunsBlinds + pStats.healsUnhooks) * 10} Pkt`);
+          showToast(`${pName}: Killer gestunt/geblendet (+10 Pkt)`);
         } else if (action === 'healUnhook') {
           pStats.healsUnhooks++;
           triggerRumble('light', !fromRemote);
           patchLiveCounterText('live-count-heal', pStats.healsUnhooks);
           patchLiveCounterText('live-player-points', (pStats.stunsBlinds + pStats.healsUnhooks) * 10);
-          if (!fromRemote) showToast(`${pName}: Geheilt / Vom Haken gerettet (+10 Pkt)`);
+          patchLiveCounterText(`squad-live-pts-${targetPlayerId}`, `${(pStats.stunsBlinds + pStats.healsUnhooks) * 10} Pkt`);
+          showToast(`${pName}: Geheilt / Vom Haken gerettet (+10 Pkt)`);
         }
       } else {
         if (action === 'genRepaired') {
@@ -1542,30 +1937,30 @@
           s.gensRepaired++;
           triggerRumble('medium', !fromRemote);
           patchLiveCounterText('killer-count-gens', `${s.gensRepaired}/5`);
-          if (!fromRemote) showToast(`Generator repariert (${s.gensRepaired}/5 -> +1 Shot)`);
+          showToast(`Generator repariert (${s.gensRepaired}/5 -> +1 Shot)`);
         } else if (action === 'survHooked') {
           if (s.survivorsHooked >= 12) return;
           s.survivorsHooked++;
           triggerRumble('light', !fromRemote);
           patchLiveCounterText('killer-count-hooks', s.survivorsHooked);
-          if (!fromRemote) showToast('Survivor angehakt (+5 Punkte)');
+          showToast('Survivor angehakt (+5 Punkte)');
         } else if (action === 'survKilled') {
           if (s.survivorsKilled >= 4) return;
           s.survivorsKilled++;
           triggerRumble('light', !fromRemote);
           patchLiveCounterText('killer-count-kills', `${s.survivorsKilled}/4`);
-          if (!fromRemote) showToast(`Survivor gekillt (${s.survivorsKilled}/4 -> +10 Punkte)`);
+          showToast(`Survivor gekillt (${s.survivorsKilled}/4 -> +10 Punkte)`);
         } else if (action === 'killerStunned') {
           s.killerStunnedBlinded++;
           triggerRumble('heavy', !fromRemote);
           patchLiveCounterText('killer-count-stun', s.killerStunnedBlinded);
-          if (!fromRemote) showToast('Stun / Blind kassiert (+2 Shots)');
+          showToast('Stun / Blind kassiert (+2 Shots)');
         } else if (action === 'survEscaped') {
           if (s.survivorsEscaped >= 4) return;
           s.survivorsEscaped++;
           triggerRumble('medium', !fromRemote);
           patchLiveCounterText('killer-count-escape', `${s.survivorsEscaped}/4`);
-          if (!fromRemote) showToast(`Survivor entkommen (${s.survivorsEscaped}/4 -> +1 Shot)`);
+          showToast(`Survivor entkommen (${s.survivorsEscaped}/4 -> +1 Shot)`);
         }
       }
 
@@ -1616,11 +2011,6 @@
       evaluateDbdMatch();
     }
 
-    /**
-     * Berechnet Punkte und Shots.
-     * Wenn eine Vorhersage (Skillchecks / Haken / Entkommene / Gens) exakt richtig geraten wurde,
-     * werden die dafür gewetteten Shots vom Shot-Counter abgezogen (man muss dafür nicht trinken).
-     */
     function evaluateDbdMatch() {
       const s = state.dbd.liveStats;
       const actual = state.dbd.actualOutcome;
@@ -1801,6 +2191,9 @@
         if (squadPlayer) {
           squadPlayer.sips += res.shots;
         }
+        if (res.playerId === state.lobby.myPlayerId && res.shots > 0) {
+          addPersonalCareerShots(res.shots);
+        }
       });
 
       results.sort((a, b) => b.points - a.points || a.shots - b.shots);
@@ -1830,7 +2223,7 @@
 
       const totalShotsInRound = results.reduce((sum, r) => sum + (Number(r.shots) || 0), 0);
 
-      state.profileArchive.unshift({
+      const newEntry = {
         id: entryId,
         dateTime: `${dateStr} - ${timeStr}`,
         gameName: 'Dead by Daylight',
@@ -1838,16 +2231,20 @@
         totalShots: totalShotsInRound,
         leaderboard: results.map((r, idx) => ({
           rank: idx + 1,
+          playerId: r.playerId,
           name: r.name,
           points: r.points,
           shots: r.shots
         }))
-      });
+      };
+
+      state.profileArchive.unshift(newEntry);
       saveArchive();
+      broadcastArchiveEntry(newEntry);
     }
 
     // =========================================================================
-    // 7. RENDER ENGINE & VIEWS (HUB, PROFIL-ARCHIV, DBD)
+    // 8. RENDER ENGINE & VIEWS (HUB, PROFIL + ACHIEVEMENTS + ARCHIV, DBD)
     // =========================================================================
     function safeCreateIcons() {
       try {
@@ -1860,12 +2257,12 @@
     function renderHubView() {
       return `
         <div class="space-y-4 animate-pop">
-          <div class="glass-card rounded-3xl p-4 sm:p-5 border border-purple-500/20 flex items-center justify-between gap-2">
+          <div class="glass-card rounded-3xl p-4 sm:p-5 border border-purple-500/20 flex items-center justify-between gap-2 shadow-xl shadow-purple-950/20">
             <div>
-              <span class="text-[10px] font-bold uppercase tracking-widest text-purple-400">Game-Hub</span>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-purple-400">Game-Hub · AAA Edition</span>
               <h2 class="font-display font-bold text-2xl text-white uppercase tracking-wide">Wähle dein Spiel</h2>
             </div>
-            <span class="text-xs font-semibold text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full">
+            <span class="text-xs font-semibold text-zinc-300 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full">
               ${GAME_MODULES.length} Titel
             </span>
           </div>
@@ -1874,10 +2271,10 @@
             ${GAME_MODULES.map(game => `
               <div
                 onclick="openGameOrFranchise('${game.id}')"
-                class="glass-card hover:bg-zinc-900/90 border ${game.borderAccent || 'border-zinc-800'} rounded-3xl p-5 cursor-pointer transition active:scale-[0.98] flex items-center justify-between gap-3"
+                class="glass-card hover:bg-zinc-900/90 border ${game.borderAccent || 'border-zinc-800'} rounded-3xl p-5 cursor-pointer transition active:scale-[0.98] flex items-center justify-between gap-3 shadow-xl shadow-rose-950/20"
               >
                 <div class="flex items-center gap-3.5 min-w-0">
-                  <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${game.accent} flex items-center justify-center shrink-0 shadow-lg">
+                  <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${game.accent} flex items-center justify-center shrink-0 shadow-lg border border-rose-500/30">
                     <i data-lucide="${game.icon}" class="w-6 h-6 text-white"></i>
                   </div>
                   <div class="min-w-0">
@@ -1897,7 +2294,8 @@
     function renderProfileView() {
       const roundsPlayed = state.profileArchive.length;
       const myPlayer = state.players.find(p => p.id === state.lobby.myPlayerId) || state.players[0];
-      const shotsDrunk = myPlayer ? Number(myPlayer.sips) || 0 : 0;
+      const lifetimeShots = Math.max(Number(state.careerStats.lifetimeShots) || 0, myPlayer ? Number(myPlayer.sips) || 0 : 0);
+      const unlockedSet = new Set(state.careerStats.unlockedAchievements || []);
 
       const modeCounts = {};
       state.profileArchive.forEach(entry => {
@@ -1919,10 +2317,13 @@
               <i data-lucide="arrow-left" class="w-4 h-4"></i>
               <span>Zurück</span>
             </button>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
+              🏆 ${unlockedSet.size} / ${ACHIEVEMENTS_DEF.length} Trophäen
+            </span>
           </div>
 
           <!-- Profil Banner -->
-          <div class="glass-card rounded-3xl p-5 border border-purple-500/30 space-y-4">
+          <div class="glass-card rounded-3xl p-5 border border-purple-500/30 space-y-4 shadow-xl shadow-purple-950/20">
             <div class="flex items-center gap-3">
               <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center shadow-lg">
                 <i data-lucide="user-check" class="w-6 h-6 text-white"></i>
@@ -1941,13 +2342,61 @@
                 <span class="font-display font-bold text-xl text-white mt-0.5 block">${roundsPlayed}</span>
               </div>
               <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3">
-                <span class="block text-[10px] uppercase tracking-wider text-zinc-400">Shots getrunken</span>
-                <span class="font-display font-bold text-xl text-rose-400 mt-0.5 block">${shotsDrunk}</span>
+                <span class="block text-[10px] uppercase tracking-wider text-zinc-400">Shots gesamt</span>
+                <span class="font-display font-bold text-xl text-rose-400 mt-0.5 block">${lifetimeShots}</span>
               </div>
               <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3">
                 <span class="block text-[10px] uppercase tracking-wider text-zinc-400">Meist gespielt</span>
                 <span class="font-bold text-xs text-cyan-300 mt-1.5 block truncate">${mostPlayed}</span>
               </div>
+            </div>
+          </div>
+
+          <!-- Achievement Tracker (Über dem Runden-Archiv) -->
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between px-1">
+              <h3 class="font-display font-bold text-lg uppercase tracking-wider text-white flex items-center gap-2">
+                <span>🏆</span>
+                <span>Achievement-Tracker</span>
+              </h3>
+              <span class="text-xs text-zinc-400">${unlockedSet.size}/${ACHIEVEMENTS_DEF.length}</span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2.5">
+              ${ACHIEVEMENTS_DEF.map(ach => {
+                const isUnlocked = unlockedSet.has(ach.id);
+                const currentProgress = ach.isMeta
+                  ? ACHIEVEMENTS_DEF.filter(a => !a.isMeta && unlockedSet.has(a.id)).length
+                  : Math.min(ach.target, lifetimeShots);
+                const pct = Math.min(100, Math.round((currentProgress / ach.target) * 100));
+
+                return `
+                  <div class="glass-card rounded-2xl p-3.5 border ${isUnlocked ? ach.border : 'border-zinc-800/90'} flex items-center gap-3.5 transition ${isUnlocked ? 'bg-zinc-900/95' : 'opacity-75'}">
+                    <div class="w-12 h-12 rounded-2xl ${isUnlocked ? `bg-gradient-to-br ${ach.gradient} p-[1.5px] shadow-lg ${ach.glow}` : 'bg-zinc-800/80 border border-zinc-700'} shrink-0 flex items-center justify-center">
+                      <div class="w-full h-full rounded-[14px] ${isUnlocked ? 'bg-zinc-950/90' : 'bg-zinc-900'} flex items-center justify-center text-2xl ${isUnlocked ? '' : 'grayscale opacity-40'}">
+                        🏆
+                      </div>
+                    </div>
+
+                    <div class="flex-1 min-w-0 space-y-1.5">
+                      <div class="flex items-center justify-between gap-2">
+                        <h4 class="font-bold text-sm text-white truncate">${ach.title}</h4>
+                        <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full shrink-0 ${
+                          isUnlocked
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                            : 'bg-zinc-800 text-zinc-400'
+                        }">
+                          ${isUnlocked ? 'Freigeschaltet' : `${currentProgress}/${ach.target}`}
+                        </span>
+                      </div>
+                      <p class="text-[11px] text-zinc-400 truncate">${ach.desc}</p>
+                      <div class="w-full h-1.5 bg-zinc-950 rounded-full overflow-hidden border border-zinc-800/80">
+                        <div class="h-full rounded-full bg-gradient-to-r ${ach.gradient} transition-all duration-500" style="width: ${pct}%"></div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
 
@@ -2009,6 +2458,7 @@
     function render() {
       updatePlayerBadge();
       updateLobbyBadge();
+      updateProfileAchBadge();
       const container = document.getElementById('app-container');
 
       if (!state.hasSetInitialName || state.players.length === 0) {
@@ -2060,7 +2510,7 @@
     }
 
     // =========================================================================
-    // 8. DEAD BY DAYLIGHT UI (MOBILE-FIRST STEP-BY-STEP FLOW)
+    // 9. DEAD BY DAYLIGHT UI (MOBILE-FIRST STEP-BY-STEP FLOW & LIVE SYNC)
     // =========================================================================
     function renderDbdView() {
       const dbd = state.dbd;
@@ -2074,7 +2524,7 @@
 
           <div class="flex items-center gap-1.5 bg-rose-950/50 border border-rose-500/30 px-3 py-1.5 rounded-xl">
             <i data-lucide="skull" class="w-3.5 h-3.5 text-rose-400"></i>
-            <span class="text-[11px] font-bold uppercase tracking-wider text-rose-200">Dead by Daylight</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-rose-200">Dead by Daylight · 10.3</span>
           </div>
         </div>
       `;
@@ -2102,7 +2552,7 @@
                   <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400">Squad / Party Modus</span>
                     <h3 class="font-display font-bold text-2xl text-white uppercase">Survivor</h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Tipps nacheinander auf Mitspieler + Map & Killer.</p>
+                    <p class="text-xs text-zinc-400 mt-0.5">Tipps nacheinander auf Mitspieler + Map & Killer (inkl. Art the Clown).</p>
                   </div>
                 </div>
                 <i data-lucide="chevron-right" class="w-5 h-5 text-cyan-400 shrink-0"></i>
@@ -2174,7 +2624,7 @@
                 </span>
               </div>
 
-              ${isRemoteClient && isAlreadyReady ? `
+              ${(state.lobby.role !== 'offline' && isAlreadyReady) ? `
                 <div class="text-center bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-4 space-y-1">
                   <p class="text-sm text-emerald-300 font-bold">Du bist Bereit!</p>
                   <p class="text-xs text-zinc-400">Warte bis alle anderen Spieler auf Bereit geklickt haben (${readyCount}/${participants.length})...</p>
@@ -2232,7 +2682,7 @@
                 <!-- Allgemeine Vorhersage -->
                 <div class="bg-zinc-900/85 border border-zinc-800 rounded-2xl p-3.5 space-y-2.5">
                   <p class="text-[11px] font-bold uppercase tracking-wider text-purple-300">Allgemeine Vorhersage</p>
-                  <div class="grid grid-cols-1 ${dbd.mode === 'survivor' ? 'sm:grid-cols-2' : 'sm:grid-cols-2'} gap-2.5">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                       <label class="block text-[10px] font-bold uppercase text-zinc-400 mb-1">Map</label>
                       <select
@@ -2291,6 +2741,7 @@
         const activePlayerId = state.lobby.role === 'client' ? state.lobby.myPlayerId : dbd.activeLivePlayerId;
         const activePlayerObj = state.players.find(p => p.id === activePlayerId) || state.players[0];
         const pStats = ensureDbdPlayerStats(activePlayerObj.id);
+        const showSquadFeed = state.lobby.role !== 'offline' && state.players.length > 1;
 
         return `
           <div class="animate-pop space-y-3">
@@ -2299,7 +2750,7 @@
             <div class="glass-card rounded-3xl p-4 border border-emerald-500/30 flex items-center justify-between">
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Match läuft live</span>
                 </div>
                 <h2 class="font-display font-bold text-2xl text-white uppercase mt-0.5">
@@ -2307,7 +2758,7 @@
                 </h2>
               </div>
               <span class="text-xs bg-zinc-900 border border-zinc-700 px-3 py-1.5 rounded-xl font-semibold text-zinc-300">
-                ${state.lobby.role !== 'offline' ? 'Eigenes Gerät' : 'Schnell-Tracker'}
+                ${state.lobby.role !== 'offline' ? 'P2P Live-Sync' : 'Schnell-Tracker'}
               </span>
             </div>
 
@@ -2369,6 +2820,31 @@
                   </div>
                 </button>
               </div>
+
+              ${showSquadFeed ? `
+                <div class="glass-card rounded-2xl p-3 border border-zinc-800/90 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-purple-300">Squad Live-Counter</span>
+                    <span class="text-[10px] text-zinc-500">Echtzeit-Sync</span>
+                  </div>
+                  <div class="grid grid-cols-1 gap-1.5">
+                    ${state.players.map(pl => {
+                      const st = ensureDbdPlayerStats(pl.id);
+                      const pts = (st.stunsBlinds + st.healsUnhooks) * 10;
+                      return `
+                        <div class="flex items-center justify-between bg-zinc-950/80 border border-zinc-800/70 rounded-xl px-3 py-1.5 text-[11px]">
+                          <span class="font-semibold text-zinc-200 truncate max-w-[110px]">${pl.name}</span>
+                          <div class="flex items-center gap-2.5 text-zinc-400">
+                            <span>SC: <strong id="squad-live-missed-${pl.id}" class="text-rose-400">${st.missedChecks}</strong></span>
+                            <span>Haken: <strong id="squad-live-hooks-${pl.id}" class="text-amber-300">${st.hooks}/3</strong></span>
+                            <strong id="squad-live-pts-${pl.id}" class="text-emerald-400">${pts} Pkt</strong>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              ` : ''}
             ` : `
               <div class="grid grid-cols-2 gap-2.5">
                 <button onclick="triggerDbdLiveEvent('genRepaired')" class="glass-card hover:bg-rose-950/30 border border-rose-500/40 rounded-3xl p-3.5 text-left transition active:scale-95 flex flex-col justify-between gap-2">
